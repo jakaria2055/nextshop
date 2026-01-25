@@ -46,10 +46,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
        if(!dbUser){
         dbUser = await User.create({
           name: user.name,
-          email: user.email
+          email: user.email,
+          image: user.image
         })
        }
+
+       user.id = dbUser._id.toString()
+       user.role = dbUser.role
       }
+      return true
     },
 
     jwt({ token, user }) {

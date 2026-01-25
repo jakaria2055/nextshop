@@ -1,11 +1,5 @@
-"use client"
-import {
-  Leaf,
-  Loader2,
-  LogIn,
-  Mail,
-  RectangleEllipsis,
-} from "lucide-react";
+"use client";
+import { Leaf, Loader2, LogIn, Mail, RectangleEllipsis } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { FormEvent, useState } from "react";
 import Image from "next/image";
@@ -13,36 +7,33 @@ import googleIMG from "@/assets/google.webp";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 
-
 function Login() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter()
-  const session = useSession()
+  const router = useRouter();
+  const session = useSession();
 
-  console.log(session)
+  console.log(session);
 
-  const handleLogin =async (e:FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-        await signIn("credentials", {
-            email, password
-        })
-        setLoading(false)
+      await signIn("credentials", {
+        email,
+        password,
+      });
+      router.push("/login")
+      setLoading(false);
     } catch (error) {
-        console.log(error)
-        setLoading(false)
+      console.log(error);
+      setLoading(false);
     }
-  }
-
-
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-10 bg-white relative">
-
       <motion.h1 className="text-4xl font-extrabold text-blue-700 mb-2">
         Welcome Back
       </motion.h1>
@@ -50,11 +41,10 @@ function Login() {
         Signin NextShop just now <Leaf className="w-5 h-5 text-blue-600" />
       </p>
 
-      <motion.form 
+      <motion.form
         onSubmit={handleLogin}
         className="flex flex-col gap-5 w-full max-w-sm"
       >
-
         {/* Email */}
         <div className="relative">
           <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
@@ -102,13 +92,16 @@ function Login() {
           <span className="bg-gray-200 flex-1 h-px"></span>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-3 border border-gray-300 hover:bg-gray-50 py-3 text-gray-700 font-medium transition-all duration-200">
+        <div className="w-full flex items-center justify-center gap-3 border border-gray-300 hover:bg-gray-50 py-3 text-gray-700 font-medium transition-all duration-200"  onClick={()=>signIn("google", {callbackUrl: "/"})}>
           <Image src={googleIMG} width={20} height={20} alt={"Google PNG"} />
           Continue With Google
-        </button>
+        </div>
       </motion.form>
 
-      <p className="cursor-pointer text-gray-600 mt-6 text-sm flex items-center justify-center gap-1" onClick={()=>router.push("/register")}>
+      <p
+        className="cursor-pointer text-gray-600 mt-6 text-sm flex items-center justify-center gap-1"
+        onClick={() => router.push("/register")}
+      >
         Do no have an account? <LogIn className="w-4 h-4" />
         <span className="text-blue-600 font-semibold">Sign Up</span>
       </p>

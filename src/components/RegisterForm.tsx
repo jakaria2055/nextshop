@@ -13,6 +13,8 @@ import Image from "next/image";
 import googleIMG from "@/assets/google.webp";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react"
+
 
 type propType = {
   prevStep: (s: number) => void;
@@ -23,7 +25,7 @@ function RegisterForm({ prevStep }: propType) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     setLoading(true);
@@ -34,7 +36,7 @@ function RegisterForm({ prevStep }: propType) {
         email,
         password,
       });
-      console.log(result.data);
+      router.push("/login")
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -122,13 +124,16 @@ function RegisterForm({ prevStep }: propType) {
           <span className="bg-gray-200 flex-1 h-px"></span>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-3 border border-gray-300 hover:bg-gray-50 py-3 text-gray-700 font-medium transition-all duration-200">
+        <div className="w-full flex items-center justify-center gap-3 border border-gray-300 hover:bg-gray-50 py-3 text-gray-700 font-medium transition-all duration-200" onClick={()=>signIn("google", {callbackUrl:"/"})}>
           <Image src={googleIMG} width={20} height={20} alt={"Google PNG"} />
           Continue With Google
-        </button>
+        </div>
       </motion.form>
 
-      <p className="cursor-pointer text-gray-600 mt-6 text-sm flex items-center justify-center gap-1" onClick={()=>router.push("/login")}>
+      <p
+        className="cursor-pointer text-gray-600 mt-6 text-sm flex items-center justify-center gap-1"
+        onClick={() => router.push("/login")}
+      >
         Already have an account? <LogIn className="w-4 h-4" />
         <span className="text-blue-600 font-semibold">Sign In</span>
       </p>
