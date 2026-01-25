@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Provider from "@/Provider";
 
 export const metadata: Metadata = {
   title: "NextShop | Just in time delivery app",
@@ -14,8 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="w-full min-h-screen bg-linear-to-b from-blue-200 to-white">
-        {children}
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
 }
+
+// Next 3: 33

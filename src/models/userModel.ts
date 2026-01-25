@@ -4,7 +4,7 @@ interface IUser {
   _id?: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   mobile?: string;
   role: "user" | "deliveryBoy" | "admin";
 }
@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     mobile: { type: String, required: false },
     role: {
       type: String,
