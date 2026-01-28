@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Bike, PhoneCallIcon, User, UserCog } from "lucide-react";
 import axios from "axios";
 import { redirect } from "next/navigation";
-
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 function EditRoleMobile() {
   const [roles, setRoles] = useState([
@@ -16,18 +17,21 @@ function EditRoleMobile() {
 
   const [selectedRole, setSelectedRole] = useState("");
   const [mobile, setMobile] = useState("");
+  const { update } = useSession();
+  const router = useRouter();
 
   const handleEdit = async () => {
     try {
       const result = await axios.post("/api/user/edit-role-mobile", {
         role: selectedRole,
-        mobile
-      })
-      redirect("/")
+        mobile,
+      });
+      await update({ role: selectedRole });
+      router.push("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col min-h-screen p-6 w-full">
@@ -72,7 +76,7 @@ function EditRoleMobile() {
 
       <div className="flex flex-col items-center">
         <motion.button
-        disabled={mobile.length!==11 || !selectedRole}
+          disabled={mobile.length !== 11 || !selectedRole}
           className={`inline-flex items-center gap-2 font-semibold py-3 px-8 rounded-2xl shadow-md transition-all duration-300 w-[200px] mt-10 ${selectedRole && mobile.length === 11 ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
           onClick={handleEdit}
         >

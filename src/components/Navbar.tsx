@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Package, Search, ShoppingCartIcon, User } from "lucide-react";
+import { LogOut, Package, Search, ShoppingCartIcon, User, X } from "lucide-react";
 import { motion } from "framer-motion";
 import mongoose from "mongoose";
 import { AnimatePresence } from "motion/react";
@@ -22,6 +22,7 @@ interface IUser {
 function Navbar({ user }: { user: IUser }) {
   const [open, setOpen] = useState(false);
   const profileDropDown = useRef<HTMLDivElement>(null);
+  const [searchBarOpen, setSearchBarOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -32,12 +33,18 @@ function Navbar({ user }: { user: IUser }) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]); // Add 'open' as dependency
 
   return (
-    <div className="w-[95%]  fixed top-4 left-1/2 -translate-x-1/2 bg-linear-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg shadow-black/30 flex justify-between items-center h-16 px-4 md:px-8 z-50">
+    <div className="w-[95%] fixed top-4 left-1/2 -translate-x-1/2 bg-linear-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg shadow-black/30 flex justify-between items-center h-16 px-4 md:px-8 z-50">
       <Link
         href={"/"}
         className="text-white font-extrabold text-2xl sm:text-3xl tracking-wide hover:scale-105 transition-transform"
@@ -55,6 +62,11 @@ function Navbar({ user }: { user: IUser }) {
       </form>
 
       <div className="flex items-center gap-3 md:gap-6 relative">
+
+        <div className="bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition md:hidden" onClick={()=>setSearchBarOpen((prev)=>!prev)}>
+          <Search className="text-blue-600 w-6 h-6" />
+        </div>
+
         <Link
           href={""}
           className="relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition"
@@ -65,9 +77,9 @@ function Navbar({ user }: { user: IUser }) {
           </span>
         </Link>
 
-        <div className="relative">
+        <div className="relative" ref={profileDropDown}>
           <div
-            className="bg-white rounded-full w-11 h-11 flex items-center justify-center overflow-hidden shadow-md hover:scale-105 transition-transform"
+            className="bg-white rounded-full w-11 h-11 flex items-center justify-center overflow-hidden shadow-md hover:scale-105 transition-transform cursor-pointer"
             onClick={() => setOpen((prev) => !prev)}
           >
             {user.image ? (
@@ -84,7 +96,13 @@ function Navbar({ user }: { user: IUser }) {
 
           <AnimatePresence>
             {open && (
-              <motion.div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-999">
+              <motion.div 
+                className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-[999]"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
                 <div className="flex items-center gap-3 px-3 py-2 border-b border-gray-100">
                   <div className="w-10 h-10 relative rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
                     {user.image ? (
@@ -117,15 +135,34 @@ function Navbar({ user }: { user: IUser }) {
                   My Orders
                 </Link>
 
-                <button className="flex items-center gap-2 w-full text-left px-3 py-3 hover:bg-red-50 rounded-lg text-gray-700 font-medium" onClick={()=>{
-                  setOpen(false) 
-                  signOut({callbackUrl:"/login"})
-                  }}>
-                    <LogOut className="w-5 h-5 text-red-600" />
-                    Log Out
-                  </button>
+                <button 
+                  className="flex items-center gap-2 w-full text-left px-3 py-3 hover:bg-red-50 rounded-lg text-gray-700 font-medium" 
+                  onClick={() => {
+                    setOpen(false);
+                    signOut({ callbackUrl: "/login" });
+                  }}
+                >
+                  <LogOut className="w-5 h-5 text-red-600" />
+                  Log Out
+                </button>
               </motion.div>
             )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {
+              searchBarOpen && 
+              <motion.div className="fixed top-24 left-1/2 -translate-x-1/2 w-[90%] bg-white rounded-full shadow-lg z-40 flex items-center px-4 py-2">
+                <Search className="text-gray-500 w-5 h-5 mr-2" />
+                <form className="grow">
+                  <input type="text" className="w-full outline-none text-gray-700" placeholder="meet, rice, chips, floor..."/>
+                </form>
+                <button className="" onClick={()=>setSearchBarOpen(false)}>
+                  <X className="text-gray-500 w-5 h-5" />
+                </button>
+
+              </motion.div>
+            }
           </AnimatePresence>
         </div>
       </div>
