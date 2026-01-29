@@ -18,7 +18,7 @@ const grocerySchema = new mongoose.Schema<IGrocery>(
         "Fruits & Vegetables",
         "Dairy & Eggs",
         "Rice, floor & Grains",
-        "Snacks & Buscuits",
+        "Snacks & Biscuits",
         "Spices & Masalas",
         "Beverages & Drinks",
         "Personal Care",
@@ -29,12 +29,17 @@ const grocerySchema = new mongoose.Schema<IGrocery>(
       required: true,
     },
     price: { type: String, required: true },
-    unit: { type: String, required: true },
+    unit: {
+      type: String,
+      required: true,
+      enum: ["kg", "g", "liter", "ml", "piece", "pack"],
+    },
     image: { type: String, required: true },
   },
   { timestamps: true },
 );
 
-const Grocery = mongoose.models.Grocery || mongoose.model("Grocery", grocerySchema);
+const Grocery =
+  mongoose.models.Grocery || mongoose.model("Grocery", grocerySchema);
 
 export default Grocery;

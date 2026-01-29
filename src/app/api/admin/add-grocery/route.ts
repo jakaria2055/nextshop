@@ -21,7 +21,15 @@ export async function POST(req: NextRequest) {
     const category = formData.get("category") as string;
     const unit = formData.get("unit") as string;
     const price = formData.get("price") as string;
-    const file = formData.get("category") as Blob | null;
+    const file = formData.get("image") as Blob | null;
+
+    // Validation
+    if (!name || !category || !unit || !price) {
+      return NextResponse.json(
+        { message: "All fields are required" },
+        { status: 400 },
+      );
+    }
 
     let imageUrl;
     if (file) {
@@ -33,11 +41,12 @@ export async function POST(req: NextRequest) {
       category,
       unit,
       price,
-      file: imageUrl,
+      image: imageUrl,
     });
 
     return NextResponse.json(grocery, { status: 201 });
   } catch (error) {
+    console.error("Create Grocery Error:", error);
     return NextResponse.json(
       { message: `Create Grocery API Error! ${error}` },
       { status: 500 },

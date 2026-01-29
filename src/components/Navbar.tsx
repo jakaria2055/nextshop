@@ -4,6 +4,7 @@ import {
   Boxes,
   ClipboardCheck,
   LogOut,
+  LogOutIcon,
   Menu,
   Package,
   PlusCircle,
@@ -58,36 +59,82 @@ function Navbar({ user }: { user: IUser }) {
 
   const sideBar = menuOpen
     ? createPortal(
-    <AnimatePresence>
-      <motion.div transition={{type:"spring  "}} className="fixed top-0 left-0 h-full w-[75%] sm:w-[60%] z-9999 bg-linear-to-b from-blue-800/90 via-blue-700/80 to-blue-900/90 shadow-md flex flex-col ps-6 text-white">
+        <AnimatePresence>
+          <motion.div
+            transition={{ type: "spring" }}
+            className="fixed top-0 left-0 h-full w-[75%] sm:w-[60%] z-9999 bg-linear-to-b from-blue-800/90 via-blue-700/80 to-blue-900/90 shadow-md flex flex-col ps-6 text-white"
+          >
+            <div className="flex justify-between items-center mb-2 mt-5">
+              <h1 className="font-extrabold text-2xl tracking-wide text-white/90">
+                Admin Panel
+              </h1>
+              <button
+                className="text-white/90 hover:text-red-400 text-2xl font-medium mr-3"
+                onClick={() => setMenuOpen(false)}
+              >
+                <X />
+              </button>
+            </div>
 
-      <div className="flex justify-between items-center mb-2 mt-5">
-        <h1 className="font-extrabold text-2xl tracking-wide text-white/90">Admin Panel</h1>
-        <button className="text-white/90 hover:text-red-400 text-2xl font-medium mr-3" onClick={()=>setMenuOpen(false)}><X /></button>
-      </div>
+            <div className="flex items-center gap-3 p-3 mt-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all shadow-inner">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400/60 shadow-lg">
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt="user"
+                    fill
+                    className="object-cover rounded-full"
+                  />
+                ) : (
+                  <User />
+                )}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  {user.name}
+                </h2>
+                <p className="text-xs text-blue-200 capitalize tracking-wide">
+                  {user.role}
+                </p>
+              </div>
+            </div>
 
-      <div className="flex items-center gap-3 p-3 mt-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all shadow-inner">
-        <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400/60 shadow-lg"> 
-          {user.image ? (
-              <Image
-                src={user.image}
-                alt="user"
-                fill
-                className="object-cover rounded-full"
-              />
-            ) : (
-              <User />
-            )}
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">{user.name}</h2>
-          <p className="text-xs text-blue-200 capitalize tracking-wide">{user.role}</p>
-        </div>
-      </div>
+            <div className="flex flex-col gap-3 font-medium mt-6">
+              <Link
+                href={"/admin/add-grocery"}
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 hover:pl-4 transition-all"
+              >
+                <PlusCircle className="w-5 h-5" />
+                Add Grocery
+              </Link>
+              <Link
+                href={""}
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 hover:pl-4 transition-all"
+              >
+                <Boxes className="w-5 h-5" />
+                View Grocery
+              </Link>
+              <Link
+                href={""}
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 hover:pl-4 transition-all"
+              >
+                <ClipboardCheck className="w-5 h-5" />
+                Orders
+              </Link>
+            </div>
 
-
-      </motion.div>
-    </AnimatePresence>,  document.body)
+            <div className="my-5 border-t border-white/20"></div>
+            <div
+              className="flex items-center gap-3 text-red-300 font-semibold mt-auto hover:bg-red-500/20 p-3 rounded-lg    transition-all"
+              onClick={async () => signOut({ callBackUrl: "/" })}
+            >
+              <LogOutIcon className="w-5 h-5 text-red-300" />
+              Logout
+            </div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body,
+      )
     : null;
 
   return (
@@ -136,7 +183,7 @@ function Navbar({ user }: { user: IUser }) {
           <>
             <div className="hidden md:flex gap-4 items-center">
               <Link
-                href={""}
+                href={"/admin/add-grocery"}
                 className="flex items-center gap-2 bg-white text-blue-700 font-semibold px-4 py-2 rounded-full hover:bg-blue-100 transition-all"
               >
                 <PlusCircle className="w-5 h-5" />
