@@ -21,6 +21,8 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { createPortal } from "react-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface IUser {
   _id?: mongoose.Types.ObjectId;
@@ -37,6 +39,7 @@ function Navbar({ user }: { user: IUser }) {
   const profileDropDown = useRef<HTMLDivElement>(null);
   const [searchBarOpen, setSearchBarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const {cartData} = useSelector((state: RootState)=>state.cart)
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -173,7 +176,7 @@ function Navbar({ user }: { user: IUser }) {
             >
               <ShoppingCartIcon className="text-blue-600 w-6 h-6" />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold shadow">
-                0
+                {cartData.length}
               </span>
             </Link>
           </>
