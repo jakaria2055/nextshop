@@ -35,7 +35,9 @@ function Checkout() {
   const router = useRouter();
 
   const { userData } = useSelector((state: RootState) => state.user);
-  const { subTotal, deliveryFee, finalTotal } = useSelector((state: RootState) => state.cart);
+  const { cartData, subTotal, deliveryFee, finalTotal } = useSelector(
+    (state: RootState) => state.cart,
+  );
 
   const [address, setAddress] = useState({
     fullName: "",
@@ -129,6 +131,38 @@ function Checkout() {
     };
     fetchAddress();
   }, [position]);
+
+  // FETCH POST TO ORDER API
+  const handleCod = async () => {
+    try {
+      const result =await axios.post("/api/user/order", {
+        userId: userData?._id,
+        items: cartData.map((item) => ({
+          grocery: item._id,
+          name: item.name,
+          price: item.price,
+          unit: item.unit,
+          quantity: item.quantity,
+          image: item.image,
+        })),
+        totalAmount: finalTotal,
+        address: {
+          fullName: address.fullName,
+          mobile: address.mobile,
+          city: address.city,
+          state: address.state,
+          fullAddress: address.fullAddress,
+          pincode: address.pincode,
+          latitude: position[0],
+          longitude: position[1],
+        },
+        paymentMethod
+      });
+      router.push("/user/order-success")
+    } catch (error) {
+      console.log(error)
+    }
+  };
 
   // SET CURRENT LOCATION
   const handleCurrentLocation = () => {
@@ -329,10 +363,10 @@ function Checkout() {
             Payment Method
           </h2>
 
-              {/* PAYMENT OPTION BUTTON */}
+          {/* PAYMENT OPTION BUTTON */}
           <div className="space-y-4 mb-6">
             <button
-            onClick={(e)=>setPaymentMethod("online")}
+              onClick={(e) => setPaymentMethod("online")}
               className={`flex items-center gap-3 w-full border rounded-lg p-3 transition-all ${paymentMethod === "online" ? "border-blue-600 bg-blue-50 shadow-sm" : "hover:bg-gray-50"}`}
             >
               <CreditCardIcon className="text-blue-600" />
@@ -342,7 +376,7 @@ function Checkout() {
             </button>
 
             <button
-            onClick={(e)=>setPaymentMethod("cod")}
+              onClick={(e) => setPaymentMethod("cod")}
               className={`flex items-center gap-3 w-full border rounded-lg p-3 transition-all ${paymentMethod === "cod" ? "border-blue-600 bg-blue-50 shadow-sm" : "hover:bg-gray-50"}`}
             >
               <Truck className="text-blue-600" />
@@ -352,7 +386,7 @@ function Checkout() {
             </button>
           </div>
 
-              {/* BILL SLIP */}
+          {/* BILL SLIP */}
           <div className="border-t pt-4 text-gray-700 space-y-2 text-sm sm:text-base">
             <div className="flex justify-between">
               <span className="font-semibold">Subtotal: </span>
@@ -360,16 +394,30 @@ function Checkout() {
             </div>
             <div className="flex justify-between">
               <span className="font-semibold">DeliveryFee: </span>
-              <span className="font-semibold text-blue-700">৳ {deliveryFee}</span>
+              <span className="font-semibold text-blue-700">
+                ৳ {deliveryFee}
+              </span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-3">
               <span className="">Final Total: </span>
-              <span className="font-semibold text-blue-700">৳ {finalTotal}</span>
+              <span className="font-semibold text-blue-700">
+                ৳ {finalTotal}
+              </span>
             </div>
           </div>
 
-          <motion.button whileTap={{scale:0.93}} className="w-full mt-6 bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700 transition-all font-semibold">
-            {paymentMethod=="cod" ? "Place Order" : "Pay & Place Order"}
+          <motion.button
+            whileTap={{ scale: 0.93 }}
+            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700 transition-all font-semibold"
+            onClick={() => {
+              if (paymentMethod == "cod") {
+                handleCod();
+              } else {
+                null;
+              }
+            }}
+          >
+            {paymentMethod == "cod" ? "Place Order" : "Pay & Place Order"}
           </motion.button>
         </motion.div>
       </div>
