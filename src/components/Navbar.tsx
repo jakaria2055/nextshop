@@ -200,7 +200,7 @@ function Navbar({ user }: { user: IUser }) {
                 View Grocery
               </Link>
               <Link
-                href={""}
+                href={"/admin/manage-orders"}
                 className="flex items-center gap-2 bg-white text-blue-700 font-semibold px-4 py-2 rounded-full hover:bg-blue-100 transition-all"
               >
                 <ClipboardCheck className="w-5 h-5" />
