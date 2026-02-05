@@ -2,6 +2,9 @@ import connectDB from "@/lib/db";
 import Order from "@/models/orderModel";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,10 +32,31 @@ export async function POST(req: NextRequest) {
       address,
       status: "pending",
     });
-    return NextResponse.json(newOrder, { status: 201 });
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      success_url: `${process.env.NEXT_BASE_URL}/user/order-success`,
+      cancel_url: `${process.env.NEXT_BASE_URL}/user/order-cancel`,
+      line_items: [
+        {
+          price_data: {
+            currency: "bdt",
+            product_data: {
+              name: "NextShop Payment",
+            },
+            unit_amount: totalAmount * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: { orderId: newOrder._id.toString() },
+    });
+
+    return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-      { message: `Order place API error: ${error}` },
+      { message: `Online Payment Url API FAILED: ${error}` },
       { status: 500 },
     );
   }
