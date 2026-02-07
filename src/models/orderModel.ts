@@ -29,7 +29,7 @@ export interface IOrder {
   assignment?: mongoose.Types.ObjectId;
   assignedDeliveryBoy?: mongoose.Types.ObjectId;
   status: "pending" | "out of delivery" | "delivered";
-  createdAT?: Date;
+  createdAt?: Date;
   updatedAt?: Date;
 }
 

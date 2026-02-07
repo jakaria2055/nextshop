@@ -12,10 +12,25 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
+import axios from "axios";
 
 function AdminOrderCard({ order }: { order: IOrder }) {
   const statusOption = ["pending", "out of delivery"];
   const [expanded, setExpanded] = useState(false);
+  const [status, setStatus] = useState<string>(order.status);
+
+  const updateStatus = async (orderId: string, status: string) => {
+    try {
+      const result = await axios.post(
+        `/api/admin/update-order-status/${orderId}`,
+        { status },
+      );
+      console.log(result);
+      setStatus(status)
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <motion.div className="bg-white shadow-md hover:shadow-lg border border-gray-100 rounded-2xl p-6 transition-all">
@@ -68,19 +83,23 @@ function AdminOrderCard({ order }: { order: IOrder }) {
         <div className="flex flex-col items-start md:items-end gap-2">
           <span
             className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${
-              order.status === "delivered"
+              status === "delivered"
                 ? "bg-blue-100 text-blue-700"
-                : order.status === "pending"
+                : status === "pending"
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-cyan-100 text-cyan-700"
             }`}
           >
-            {order.status}
+            {status}
           </span>
 
           <select
             className="border border-gray-300 rounded-lg px-3 py-1 text-sm shadow-sm hover:border-blue-400 transition focus:ring-2 focus:ring-blue-500
            outline-none"
+            value={status}
+            onChange={(e) =>
+              updateStatus(order._id?.toString()!, e.target.value)
+            }
           >
             {statusOption.map((st) => (
               <option value={st} key={st}>
@@ -152,7 +171,7 @@ function AdminOrderCard({ order }: { order: IOrder }) {
       <div className="border-t pt-3 mt-3 flex justify-between items-center text-sm font-semibold text-gray-800">
         <div className="flex items-center gap-2 text-gray-700 text-sm">
           <Truck size={16} className="text-blue-700" />
-          <span>Delivery: {order.status}</span>
+          <span>Delivery: {status}</span>
         </div>
         <div className="font-semibold">
           Total: {order.totalAmount}{" "}
