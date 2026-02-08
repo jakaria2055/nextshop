@@ -1,4 +1,5 @@
 import connectDB from "@/lib/db";
+import emitEventHandler from "@/lib/emitEventHandler";
 import DeliveryAssignment from "@/models/deliveryAssignmentModel";
 import Order from "@/models/orderModel";
 import User from "@/models/userModel";
@@ -49,9 +50,15 @@ export async function POST(
 
       if (candidates.length == 0) {
         await order.save();
+
+        await emitEventHandler("order-status-update", {
+          orderId: order._id,
+          status: order.status,
+        });
+
         return NextResponse.json(
           { message: "there are no available delivery boys" },
-          { status: 400 },
+          { status: 200 },
         );
       }
 
@@ -61,19 +68,36 @@ export async function POST(
         status: "brodcasted",
       });
 
-      ((order.assignment = deliveryAssignment._id),
-        (deliveryBoysPayload = availableDeliveryBoys.map((b) => ({
-          id: b._id,
-          name: b.name,
-          mobile: b.mobile,
-          latitude: b.location.coordinates[1],
-          longitude: b.location.coordinates[0],
-        }))));
+      await deliveryAssignment.populate("order");
+      for (const boyId of candidates) {
+        const boy = await User.findById(boyId);
+        if (boy.socketId) {
+          await emitEventHandler(
+            "new-assignment",
+            deliveryAssignment,
+            boy.socketId,
+          );
+        }
+      }
+
+      order.assignment = deliveryAssignment._id;
+      deliveryBoysPayload = availableDeliveryBoys.map((b) => ({
+        id: b._id,
+        name: b.name,
+        mobile: b.mobile,
+        latitude: b.location.coordinates[1],
+        longitude: b.location.coordinates[0],
+      }));
       await deliveryAssignment.populate("order");
     }
 
     await order.save();
     await order.populate("user");
+
+    await emitEventHandler("order-status-update", {
+      orderId: order._id,
+      status: order.status,
+    });
 
     return NextResponse.json(
       {

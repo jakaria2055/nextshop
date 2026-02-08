@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-// import { motion } from "framer-motion";
 import axios from "axios";
 import { IOrder } from "@/models/orderModel";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AdminOrderCard from "@/components/AdminOrderCard";
+import { getSocket } from "@/lib/socket";
 
 function ManageOrders() {
   const [orders, setOrders] = useState<IOrder[]>();
@@ -21,6 +21,14 @@ function ManageOrders() {
       }
     };
     getOrders();
+  }, []);
+
+  useEffect(():any => {
+    const socket = getSocket();
+    socket?.on("new-order", (newOrder) => {
+      setOrders((prev) => [newOrder, ...prev!]);
+    });
+    return () => socket.off("new-order");
   }, []);
 
   return (

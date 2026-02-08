@@ -1,6 +1,6 @@
 "use client";
 import { IOrder } from "@/models/orderModel";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -12,9 +12,11 @@ import {
   TruckElectric,
 } from "lucide-react";
 import Image from "next/image";
+import { getSocket } from "@/lib/socket";
 
 function UserOrderCard({ order }: { order: IOrder }) {
   const [expanded, setExpanded] = useState(false);
+  const [status, setStatus] = useState(order.status);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -30,6 +32,17 @@ function UserOrderCard({ order }: { order: IOrder }) {
         return "bg-gray-100 text-gray-600 border border-gray-300";
     }
   };
+
+  useEffect((): any => {
+    const socket = getSocket();
+    socket.on("order-status-update", (data) => {
+      if (data.orderId.toString() == order?._id?.toString()) {
+        setStatus(data.status);
+      }
+    });
+
+    return () => socket.off("order-status-update");
+  }, []);
 
   return (
     <motion.div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
@@ -59,9 +72,9 @@ function UserOrderCard({ order }: { order: IOrder }) {
 
           {/* DELIVERY STATUS */}
           <span
-            className={`px-3 py-1 text-xs font-semibold border rounded-full ${getStatusColor(order.status)}`}
+            className={`px-3 py-1 text-xs font-semibold border rounded-full ${getStatusColor(status)}`}
           >
-            {order.status}
+            {status}
           </span>
         </div>
       </div>
@@ -124,11 +137,18 @@ function UserOrderCard({ order }: { order: IOrder }) {
                     />
 
                     <div>
-                      <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                      <p className="text-xs text-gray-500">{item.quantity} x {item.unit}</p>
+                      <p className="text-sm font-medium text-gray-800">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {item.quantity} x {item.unit}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-800"><span className="text-xs text-gray-400">BDT:</span> {Number(item.price) * item.quantity}</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    <span className="text-xs text-gray-400">BDT:</span>{" "}
+                    {Number(item.price) * item.quantity}
+                  </p>
                 </div>
               ))}
             </div>
@@ -137,11 +157,12 @@ function UserOrderCard({ order }: { order: IOrder }) {
 
         <div className="border-t pt-3 flex justify-between items-center text-sm font-semibold text-gray-800">
           <div className="flex items-center gap-2 text-gray-700 text-sm">
-            <Truck size={16}  className="text-blue-700"/>
-            <span>Delivery: {order.status}</span>
+            <Truck size={16} className="text-blue-700" />
+            <span>Delivery: {status}</span>
           </div>
           <div className="font-semibold">
-            Total: {order.totalAmount} <span className="text-xs text-gray-400">BDT</span>
+            Total: {order.totalAmount}{" "}
+            <span className="text-xs text-gray-400">BDT</span>
           </div>
         </div>
       </div>
