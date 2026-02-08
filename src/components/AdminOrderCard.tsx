@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -52,7 +52,7 @@ export interface IOrder {
 function AdminOrderCard({ order }: { order: IOrder }) {
   const statusOption = ["pending", "out of delivery"];
   const [expanded, setExpanded] = useState(false);
-  const [status, setStatus] = useState<string>(order.status);
+  const [status, setStatus] = useState<string>("pending");
 
   const updateStatus = async (orderId: string, status: string) => {
     try {
@@ -61,11 +61,15 @@ function AdminOrderCard({ order }: { order: IOrder }) {
         { status },
       );
       console.log(result);
-      setStatus(status)
+      setStatus(status);
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    setStatus(order.status);
+  }, [order]);
 
   return (
     <motion.div className="bg-white shadow-md hover:shadow-lg border border-gray-100 rounded-2xl p-6 transition-all">
@@ -112,17 +116,28 @@ function AdminOrderCard({ order }: { order: IOrder }) {
               </span>
             </p>
 
-
-            {
-              order.assignedDeliveryBoy && <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+            {order.assignedDeliveryBoy && (
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3 text-sm text-gray-700">
                   <UserCheck className="text-blue-600" size={18} />
-                  <p className="">Assigned To: <span>{order.assignedDeliveryBoy.name}</span></p>
-                  <p className="text-xs text-gray-600">☎️ +88{order.assignedDeliveryBoy.mobile}<span></span></p>
+                  <div className="font-semibold text-gray-800">
+                    <p className="">
+                      Assigned To: <span>{order.assignedDeliveryBoy.name}</span>
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      ☎️ +88{order.assignedDeliveryBoy.mobile}
+                    </p>
+                  </div>
                 </div>
 
+                <a
+                  href={`tel:${order.assignedDeliveryBoy.mobile}`}
+                  className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Call
+                </a>
               </div>
-            }
+            )}
           </div>
         </div>
 

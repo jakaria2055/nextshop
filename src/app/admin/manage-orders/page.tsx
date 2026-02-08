@@ -1,11 +1,45 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { IOrder } from "@/models/orderModel";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AdminOrderCard from "@/components/AdminOrderCard";
 import { getSocket } from "@/lib/socket";
+import mongoose from "mongoose";
+import { IUser } from "@/models/userModel";
+
+export interface IOrder {
+  _id?: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
+  items: [
+    {
+      grocery: mongoose.Types.ObjectId;
+      name: string;
+      price: string;
+      unit: string;
+      image: string;
+      quantity: number;
+    },
+  ];
+  isPaid: boolean;
+  totalAmount: number;
+  paymentMethod: "cod" | "online";
+  address: {
+    fullName: string;
+    mobile: string;
+    city: string;
+    state: string;
+    pincode: string;
+    fullAddress: string;
+    latitude: number;
+    longitude: number;
+  };
+  assignment?: mongoose.Types.ObjectId;
+  assignedDeliveryBoy?: IUser;
+  status: "pending" | "out of delivery" | "delivered";
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 function ManageOrders() {
   const [orders, setOrders] = useState<IOrder[]>();
