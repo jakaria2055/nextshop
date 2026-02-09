@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
+import DeliveryChat from "./DeliveryChat";
 
 const LiveMap = dynamic(() => import("./LiveMap"), {
   ssr: false,
@@ -16,8 +17,6 @@ const LiveMap = dynamic(() => import("./LiveMap"), {
   ),
 });
 
-
-
 interface ILocation {
   latitude: number;
   longitude: number;
@@ -27,8 +26,14 @@ function DeliveryBoyDashboard() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const { userData } = useSelector((state: RootState) => state.user);
   const [activeOrder, setActiveOrder] = useState<any>(null);
-  const [userLocation, setUserLocation] = useState<ILocation>({latitude:0, longitude: 0});
-  const [deliveryBoyLocation, setDeliveryBoyLocation] = useState<ILocation>({latitude:0, longitude: 0});
+  const [userLocation, setUserLocation] = useState<ILocation>({
+    latitude: 0,
+    longitude: 0,
+  });
+  const [deliveryBoyLocation, setDeliveryBoyLocation] = useState<ILocation>({
+    latitude: 0,
+    longitude: 0,
+  });
 
   const fetchAssignments = async () => {
     try {
@@ -117,9 +122,17 @@ function DeliveryBoyDashboard() {
             Order# {activeOrder.order._id.slice(-6)}
           </p>
 
-          <div className="rounded-xl border shadow-lg overflow-hidden mb-6"></div>
+          <div className="rounded-xl border shadow-lg overflow-hidden mb-6">
+            <LiveMap
+              userLocation={userLocation}
+              deliveryBoyLocation={deliveryBoyLocation}
+            />
+          </div>
 
-          <LiveMap userLocation={userLocation} deliveryBoyLocation={deliveryBoyLocation}/>
+          <DeliveryChat
+            orderId={activeOrder.order._id}
+            deliveryBoyId={userData?._id!}
+          />
         </div>
       </div>
     );
