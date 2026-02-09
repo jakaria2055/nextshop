@@ -15,6 +15,7 @@ import Image from "next/image";
 import { getSocket } from "@/lib/socket";
 import mongoose from "mongoose";
 import { IUser } from "@/models/userModel";
+import { useRouter } from "next/navigation";
 
 export interface IOrder {
   _id?: mongoose.Types.ObjectId;
@@ -52,6 +53,7 @@ export interface IOrder {
 function UserOrderCard({ order }: { order: IOrder }) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState(order.status);
+  const router = useRouter()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -150,7 +152,7 @@ function UserOrderCard({ order }: { order: IOrder }) {
               </a>
             </div>
 
-            <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-blue-800 transition mt-2">
+            <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-blue-700 transition mt-2" onClick={()=>router.push(`/user/track-order/${order._id?.toString()}`)}>
               <TruckElectric size={18} />
               <span>Track Delivery</span>
             </button>

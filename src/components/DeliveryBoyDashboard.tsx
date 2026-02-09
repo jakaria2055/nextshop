@@ -4,10 +4,31 @@ import { RootState } from "@/redux/store";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+
+const LiveMap = dynamic(() => import("./LiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[500px] rounded-xl bg-gray-200 flex items-center justify-center">
+      <p className="text-gray-600">Loading map...</p>
+    </div>
+  ),
+});
+
+
+
+interface ILocation {
+  latitude: number;
+  longitude: number;
+}
 
 function DeliveryBoyDashboard() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const { userData } = useSelector((state: RootState) => state.user);
+  const [activeOrder, setActiveOrder] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<ILocation>({latitude:0, longitude: 0});
+  const [deliveryBoyLocation, setDeliveryBoyLocation] = useState<ILocation>({latitude:0, longitude: 0});
 
   const fetchAssignments = async () => {
     try {
@@ -17,6 +38,33 @@ function DeliveryBoyDashboard() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    if (!userData?._id) return;
+    if (!navigator.geolocation) return;
+    const watcher = navigator.geolocation.watchPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        setDeliveryBoyLocation({
+          latitude: lat,
+          longitude: lon,
+        });
+        socket.emit("update-location", {
+          userId: userData?._id,
+          latitude: lat,
+          longitude: lon,
+        });
+      },
+      (err) => {
+        console.log(err);
+      },
+      { enableHighAccuracy: true },
+    );
+    return () => navigator.geolocation.clearWatch(watcher);
+  }, [userData?._id]);
 
   useEffect((): any => {
     const socket = getSocket();
@@ -41,7 +89,13 @@ function DeliveryBoyDashboard() {
   const fetchCurrentOrder = async () => {
     try {
       const result = await axios.get(`/api/delivery/current-order`);
-      console.log(result);
+      if (result.data.active) {
+        setActiveOrder(result.data.assignment);
+        setUserLocation({
+          latitude: result.data.assignment.order.address.latitude,
+          longitude: result.data.assignment.order.address.longitude,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -51,6 +105,25 @@ function DeliveryBoyDashboard() {
     fetchCurrentOrder();
     fetchAssignments();
   }, [userData]);
+
+  if (activeOrder && userLocation) {
+    return (
+      <div className="p-4 min-h-screen bg-gray-50 pt-24">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl font-bold text-blue-700 mb-2">
+            Active Delivery
+          </h1>
+          <p className="text-gray-600 text-sm mb-4">
+            Order# {activeOrder.order._id.slice(-6)}
+          </p>
+
+          <div className="rounded-xl border shadow-lg overflow-hidden mb-6"></div>
+
+          <LiveMap userLocation={userLocation} deliveryBoyLocation={deliveryBoyLocation}/>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-gray-50 p-4 pt-24">
