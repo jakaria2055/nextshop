@@ -106,6 +106,18 @@ function DeliveryBoyDashboard() {
     }
   };
 
+  useEffect((): any => {
+    const socket = getSocket();
+    socket.on("update-deliveryBoy-location", ({ userId, location }) => {
+      setDeliveryBoyLocation({
+        latitude: location.coordinates[1],
+        longitude: location.coordinates[0],
+      });
+    });
+
+    return ()=> socket.off("update-deliveryBoy-location")
+  }, []);
+
   useEffect(() => {
     fetchCurrentOrder();
     fetchAssignments();
@@ -144,9 +156,9 @@ function DeliveryBoyDashboard() {
         <h2 className="text-2xl font-bold mb-3 mt-[120px] text-gray-800 ">
           Delivery Assignments
         </h2>
-        {assignments.map((a) => (
+        {assignments.map((a, index) => (
           <div
-            key={a._id}
+            key={index}
             className="p-5 bg-white rounded-xl shadow mb-4 border"
           >
             <p>
