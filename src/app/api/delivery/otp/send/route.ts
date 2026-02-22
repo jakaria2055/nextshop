@@ -12,12 +12,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "order not found" }, { status: 400 });
     }
 
+
+    // Check if user is populated
+    if (!order.user || typeof order.user === "string") {
+      return NextResponse.json(
+        { message: "user information not found" },
+        { status: 400 },
+      );
+    }
+
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     order.deliveryOtp = otp;
     await order.save();
 
+    // Access email from populated user
+    const userEmail = (order.user as any).email;
+
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { message: "user email not found" },
+        { status: 400 },
+      );
+    }
+
     await sendMail(
-      order.user.email,
+      userEmail,
       "NextShop Delivery OTP",
       `<h2>NextShop Delivery OTP is <strong>${otp}</strong></h2>`,
     );
@@ -27,9 +47,10 @@ export async function POST(req: NextRequest) {
       { status: 200 },
     );
   } catch (error) {
+    console.error("Send OTP API error:", error);
     return NextResponse.json(
       { message: `sent otp API error: ${error}` },
-      { status: 400 },
+      { status: 500 } 
     );
   }
 }

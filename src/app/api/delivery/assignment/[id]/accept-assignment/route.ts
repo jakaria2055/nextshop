@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import connectDB from "@/lib/db";
+import emitEventHandler from "@/lib/emitEventHandler";
 import DeliveryAssignment from "@/models/deliveryAssignmentModel";
 import Order from "@/models/orderModel";
 import { NextRequest, NextResponse } from "next/server";
@@ -69,6 +70,13 @@ export async function GET(
         $pull: { broadcastedTo: deliveryBoyId },
       },
     );
+
+    await order.populate("assignedDeliveryBoy");
+
+    await emitEventHandler("order-assigned", {
+      orderId: order._id,
+      assignedDeliveryBoy: order.assignedDeliveryBoy,
+    });
 
     return NextResponse.json(
       { message: "order accepted successfully" },

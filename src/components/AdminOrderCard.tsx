@@ -15,6 +15,7 @@ import Image from "next/image";
 import axios from "axios";
 import mongoose from "mongoose";
 import { IUser } from "@/models/userModel";
+import { getSocket } from "@/lib/socket";
 
 export interface IOrder {
   _id?: mongoose.Types.ObjectId;
@@ -71,8 +72,22 @@ function AdminOrderCard({ order }: { order: IOrder }) {
     setStatus(order.status);
   }, [order]);
 
+  useEffect((): any => {
+    const socket = getSocket();
+    socket.on("order-status-update", (data) => {
+      if (data.orderId.toString() == order?._id?.toString()) {
+        setStatus(data.status);
+      }
+    });
+
+    return () => socket.off("order-status-update");
+  }, []);
+
   return (
-    <motion.div className="bg-white shadow-md hover:shadow-lg border border-gray-100 rounded-2xl p-6 transition-all">
+    <motion.div
+      key={order._id?.toString()}
+      className="bg-white shadow-md hover:shadow-lg border border-gray-100 rounded-2xl p-6 transition-all"
+    >
       {/* RIGHT SIDE */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-1">
@@ -80,15 +95,17 @@ function AdminOrderCard({ order }: { order: IOrder }) {
             <Package size={20} />
             Order #{order._id?.toString().slice(-6)}
           </p>
-          <span
-            className={`inline-block text-xs font-semibold px-3 py-1 rounded-full border ${
-              order.isPaid
-                ? "bg-blue-100 text-blue-700 border-blue-300"
-                : "bg-red-100 text-red-700 border-red-300"
-            }`}
-          >
-            {order.isPaid ? "Paid" : "Unpaid"}{" "}
-          </span>
+          {status != "delivered" && (
+            <span
+              className={`inline-block text-xs font-semibold px-3 py-1 rounded-full border ${
+                order.isPaid
+                  ? "bg-blue-100 text-blue-700 border-blue-300"
+                  : "bg-red-100 text-red-700 border-red-300"
+              }`}
+            >
+              {order.isPaid ? "Paid" : "Unpaid"}{" "}
+            </span>
+          )}
 
           <p className="text-gray-500 text-sm ">
             {new Date(order.createdAt!).toLocaleString()}
@@ -155,20 +172,22 @@ function AdminOrderCard({ order }: { order: IOrder }) {
             {status}
           </span>
 
-          <select
-            className="border border-gray-300 rounded-lg px-3 py-1 text-sm shadow-sm hover:border-blue-400 transition focus:ring-2 focus:ring-blue-500
+          {status != "delivered" && (
+            <select
+              className="border border-gray-300 rounded-lg px-3 py-1 text-sm shadow-sm hover:border-blue-400 transition focus:ring-2 focus:ring-blue-500
            outline-none"
-            value={status}
-            onChange={(e) =>
-              updateStatus(order._id?.toString()!, e.target.value)
-            }
-          >
-            {statusOption.map((st) => (
-              <option value={st} key={st}>
-                {st.toUpperCase()}
-              </option>
-            ))}
-          </select>
+              value={status}
+              onChange={(e) =>
+                updateStatus(order._id?.toString()!, e.target.value)
+              }
+            >
+              {statusOption.map((st) => (
+                <option value={st} key={st}>
+                  {st.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 

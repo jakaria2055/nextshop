@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import DeliveryChat from "./DeliveryChat";
+import { Loader2 } from "lucide-react";
 
 const LiveMap = dynamic(() => import("./LiveMap"), {
   ssr: false,
@@ -26,6 +27,12 @@ function DeliveryBoyDashboard() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const { userData } = useSelector((state: RootState) => state.user);
   const [activeOrder, setActiveOrder] = useState<any>(null);
+  const [showOtpBox, setShowOtpBox] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [sendOtpLoading, setSendOtpLoading] = useState(false);
+  const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+
   const [userLocation, setUserLocation] = useState<ILocation>({
     latitude: 0,
     longitude: 0,
@@ -85,7 +92,7 @@ function DeliveryBoyDashboard() {
       const result = await axios.get(
         `/api/delivery/assignment/${id}/accept-assignment`,
       );
-      console.log(result);
+      fetchCurrentOrder();
     } catch (error) {
       console.log(error);
     }
@@ -115,13 +122,45 @@ function DeliveryBoyDashboard() {
       });
     });
 
-    return ()=> socket.off("update-deliveryBoy-location")
+    return () => socket.off("update-deliveryBoy-location");
   }, []);
 
   useEffect(() => {
     fetchCurrentOrder();
     fetchAssignments();
   }, [userData]);
+
+  const sendOtp = async () => {
+    setSendOtpLoading(true);
+    try {
+      const result = await axios.post("/api/delivery/otp/send", {
+        orderId: activeOrder.order._id,
+      });
+      console.log(result.data);
+      setShowOtpBox(true);
+      setSendOtpLoading(false);
+    } catch (error) {
+      console.log(error);
+      setSendOtpLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    setVerifyOtpLoading(true);
+    try {
+      const result = await axios.post("/api/delivery/otp/verify", {
+        orderId: activeOrder.order._id,
+        otp,
+      });
+      console.log(result.data);
+      setActiveOrder(null);
+      setVerifyOtpLoading(false);
+      await fetchCurrentOrder();
+    } catch (error) {
+      setOtpError("OTP verification error!");
+      setVerifyOtpLoading(false);
+    }
+  };
 
   if (activeOrder && userLocation) {
     return (
@@ -145,6 +184,54 @@ function DeliveryBoyDashboard() {
             orderId={activeOrder.order._id}
             deliveryBoyId={userData?._id!}
           />
+
+          <div className="mt-6 bg-white rounded-xl border shadow p-6">
+            {!activeOrder.order.deliveryOtpVerification && !showOtpBox && (
+              <button
+                onClick={sendOtp}
+                className="w-full py-4 bg-blue-600 text-white rounded-lg text-center hover:bg-blue-700 transform duration-300"
+              >
+                {sendOtpLoading ? (
+                  <Loader2 size={16} className="animate-spin text-white text-center" />
+                ) : (
+                  "Mark as Delivered"
+                )}
+              </button>
+            )}
+
+            {showOtpBox && (
+              <div className="mt-4">
+                <input
+                  type="text"
+                  className="w-full py-3 border rounded-lg text-center"
+                  placeholder="Enter OTP"
+                  maxLength={4}
+                  onChange={(e) => setOtp(e.target.value)}
+                  value={otp}
+                />
+                <button
+                  onClick={verifyOtp}
+                  className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg"
+                >
+                  {verifyOtpLoading ? (
+                    <Loader2 size={16} className="animate-spin text-white text-center" />
+                  ) : (
+                    "Verify OTP"
+                  )}
+                </button>
+
+                {otpError && (
+                  <div className="text-red-500 mt-2">{otpError}</div>
+                )}
+              </div>
+            )}
+
+            {activeOrder.order.deliveryOtpVerification && (
+              <div className="text-blue text-center font-bold">
+                Delivery Completed!
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

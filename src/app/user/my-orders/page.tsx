@@ -1,11 +1,47 @@
 "use client";
-import { IOrder } from "@/models/orderModel";
+
 import axios from "axios";
 import { ArrowLeft, PackageSearch, ShoppingBagIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import UserOrderCard from "@/components/UserOrderCard";
+import { getSocket } from "@/lib/socket";
+import mongoose from "mongoose";
+import { IUser } from "@/models/userModel";
+
+export interface IOrder {
+  _id?: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
+  items: [
+    {
+      grocery: mongoose.Types.ObjectId;
+      name: string;
+      price: string;
+      unit: string;
+      image: string;
+      quantity: number;
+    },
+  ];
+  isPaid: boolean;
+  totalAmount: number;
+  paymentMethod: "cod" | "online";
+  address: {
+    fullName: string;
+    mobile: string;
+    city: string;
+    state: string;
+    pincode: string;
+    fullAddress: string;
+    latitude: number;
+    longitude: number;
+  };
+  assignment?: mongoose.Types.ObjectId;
+  assignedDeliveryBoy?: IUser;
+  status: "pending" | "out of delivery" | "delivered";
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 function MyOrder() {
   const router = useRouter();
@@ -25,6 +61,25 @@ function MyOrder() {
     getMyOrders();
   }, []);
 
+
+
+  useEffect(() => {
+    const socket = getSocket();
+    socket.on("order-assigned", ({ orderId, assignedDeliveryBoy }) => {
+      setOrders((prev) =>
+        prev?.map((o) =>
+          o._id == orderId ? { ...o, assignedDeliveryBoy } : o,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("order-assigned");
+    };
+  }, []);
+
+
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] text-gray-600">
@@ -61,21 +116,21 @@ function MyOrder() {
             <p className="text-gray-500 text-sm mt-1">
               Start Shopping to View Your Orders.{" "}
             </p>
-            <button onClick={()=>router.push("/")} className="flex justify-center items-center mt-5 w-50 px-2 py-2 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white">
+            <button
+              onClick={() => router.push("/")}
+              className="flex justify-center items-center mt-5 w-50 px-2 py-2 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white"
+            >
               <ShoppingBagIcon />
               Go for Shooping
             </button>
           </div>
         ) : (
           <div className="mt-4 space-y-6">
-            {
-              orders?.map((order, index)=>(
-                <motion.div key={index}>
-                  <UserOrderCard order={order} />
-                </motion.div>
-              ))
-            }
-
+            {orders?.map((order, index) => (
+              <motion.div key={index}>
+                <UserOrderCard order={order} />
+              </motion.div>
+            ))}
           </div>
         )}
       </div>

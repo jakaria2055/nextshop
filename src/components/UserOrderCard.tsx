@@ -53,7 +53,7 @@ export interface IOrder {
 function UserOrderCard({ order }: { order: IOrder }) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState(order.status);
-  const router = useRouter()
+  const router = useRouter();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -97,15 +97,18 @@ function UserOrderCard({ order }: { order: IOrder }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* PAYMENT STATUS */}
-          <span
-            className={`px-3 py-1 text-xs font-semibold rounded-full border ${
-              order.isPaid
-                ? "bg-green-100 text-blue-700 border-blue-300"
-                : "bg-red-100 text-red-700 border-red-300"
-            }`}
-          >
-            {order.isPaid ? "Paid" : "Unpaid"}
-          </span>
+
+          {status !== "delivered" && (
+            <span
+              className={`px-3 py-1 text-xs font-semibold rounded-full border ${
+                order.isPaid
+                  ? "bg-green-100 text-blue-700 border-blue-300"
+                  : "bg-red-100 text-red-700 border-red-300"
+              }`}
+            >
+              {order.isPaid ? "Paid" : "Unpaid"}
+            </span>
+          )}
 
           {/* DELIVERY STATUS */}
           <span
@@ -116,125 +119,130 @@ function UserOrderCard({ order }: { order: IOrder }) {
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
-        {order.paymentMethod == "cod" ? (
-          <div className="flex items-center gap-2 text-gray-700 text-sm">
-            <TruckElectric className="text-blue-600" size={16} />
-            Cash on Delivery
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-gray-700 text-sm">
-            <CreditCard size={16} className="text-blue-600" />
-            Online Payment
-          </div>
-        )}
+      {status != "delivered" && (
+        <div className="p-5 space-y-4">
+          {order.paymentMethod == "cod" ? (
+            <div className="flex items-center gap-2 text-gray-700 text-sm">
+              <TruckElectric className="text-blue-600" size={16} />
+              Cash on Delivery
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-700 text-sm">
+              <CreditCard size={16} className="text-blue-600" />
+              Online Payment
+            </div>
+          )}
 
-        {order.assignedDeliveryBoy && (
-          <div className="mt-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-sm text-gray-700">
-                <UserCheck className="text-blue-600" size={18} />
-                <div className="font-semibold text-gray-800">
-                  <p>
-                    Assigned To: <span>{order.assignedDeliveryBoy.name}</span>
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    ☎️ +88{order.assignedDeliveryBoy.mobile}
-                  </p>
+          {order.assignedDeliveryBoy && (
+            <div className="mt-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3 text-sm text-gray-700">
+                  <UserCheck className="text-blue-600" size={18} />
+                  <div className="font-semibold text-gray-800">
+                    <p>
+                      Assigned To: <span>{order.assignedDeliveryBoy.name}</span>
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      ☎️ +88{order.assignedDeliveryBoy.mobile}
+                    </p>
+                  </div>
                 </div>
+
+                <a
+                  href={`tel:+88${order.assignedDeliveryBoy.mobile}`}
+                  className="bg-blue-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Call
+                </a>
               </div>
 
-              <a
-                href={`tel:+88${order.assignedDeliveryBoy.mobile}`}
-                className="bg-blue-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+              <button
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-blue-700 transition mt-2"
+                onClick={() =>
+                  router.push(`/user/track-order/${order._id?.toString()}`)
+                }
               >
-                Call
-              </a>
+                <TruckElectric size={18} />
+                <span>Track Delivery</span>
+              </button>
             </div>
+          )}
 
-            <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow hover:bg-blue-700 transition mt-2" onClick={()=>router.push(`/user/track-order/${order._id?.toString()}`)}>
-              <TruckElectric size={18} />
-              <span>Track Delivery</span>
-            </button>
-          </div>
-        )}
-
-
-
-        <div className="flex items-center gap-2 text-gray-700 text-sm">
-          <MapPin size={16} className="text-blue-600" />
-          <span className="truncate">{order.address.fullAddress}</span>
-        </div>
-
-        <div className="border-t border-gray-200 pt-3">
-          <button
-            onClick={() => setExpanded((prev) => !prev)}
-            className="w-full flex justify-between items-center text-sm font-medium text-gray-700 hover:text-blue-700 transition"
-          >
-            <span className="flex items-center gap-2">
-              <Package size={16} className="text-blue-600" />
-              {expanded ? "Hide Items" : `View ${order.items.length} Items`}
-            </span>
-
-            {expanded ? (
-              <ChevronUp size={16} className="text-blue-600" />
-            ) : (
-              <ChevronDown size={16} className="text-blue-600" />
-            )}
-          </button>
-
-          <motion.div
-            animate={{
-              height: expanded ? "auto" : 0,
-              opacity: expanded ? 1 : 0,
-            }}
-            className="overflow-hidden"
-          >
-            <div className="mt-3 space-y-3">
-              {order.items.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center bg-gray-50 rounded-xl px-3 py-2 hover:bg-gray-100 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={48}
-                      height={48}
-                      className="rounded-lg object-cover border border-gray-200"
-                    />
-
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {item.quantity} x {item.unit}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-800">
-                    <span className="text-xs text-gray-400">BDT:</span>{" "}
-                    {Number(item.price) * item.quantity}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="border-t pt-3 flex justify-between items-center text-sm font-semibold text-gray-800">
           <div className="flex items-center gap-2 text-gray-700 text-sm">
-            <Truck size={16} className="text-blue-700" />
-            <span>Delivery: {status}</span>
+            <MapPin size={16} className="text-blue-600" />
+            <span className="truncate">{order.address.fullAddress}</span>
           </div>
-          <div className="font-semibold">
-            Total: {order.totalAmount}{" "}
-            <span className="text-xs text-gray-400">BDT</span>
+
+          <div className="border-t border-gray-200 pt-3">
+            <button
+              onClick={() => setExpanded((prev) => !prev)}
+              className="w-full flex justify-between items-center text-sm font-medium text-gray-700 hover:text-blue-700 transition"
+            >
+              <span className="flex items-center gap-2">
+                <Package size={16} className="text-blue-600" />
+                {expanded ? "Hide Items" : `View ${order.items.length} Items`}
+              </span>
+
+              {expanded ? (
+                <ChevronUp size={16} className="text-blue-600" />
+              ) : (
+                <ChevronDown size={16} className="text-blue-600" />
+              )}
+            </button>
+
+            <motion.div
+              animate={{
+                height: expanded ? "auto" : 0,
+                opacity: expanded ? 1 : 0,
+              }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 space-y-3">
+                {order.items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center bg-gray-50 rounded-xl px-3 py-2 hover:bg-gray-100 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={48}
+                        height={48}
+                        className="rounded-lg object-cover border border-gray-200"
+                      />
+
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {item.quantity} x {item.unit}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-800">
+                      <span className="text-xs text-gray-400">BDT:</span>{" "}
+                      {Number(item.price) * item.quantity}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="border-t pt-3 flex justify-between items-center text-sm font-semibold text-gray-800">
+            <div className="flex items-center gap-2 text-gray-700 text-sm">
+              <Truck size={16} className="text-blue-700" />
+              <span>Delivery: {status}</span>
+            </div>
+            <div className="font-semibold">
+              Total: {order.totalAmount}{" "}
+              <span className="text-xs text-gray-400">BDT</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 }
