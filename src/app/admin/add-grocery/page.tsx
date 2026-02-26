@@ -137,8 +137,8 @@ function AddGrocery() {
                 value={category}
               >
                 <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option value={cat} key={cat}>
+                {categories.map((cat, i) => (
+                  <option value={cat} key={i}>
                     {cat}
                   </option>
                 ))}

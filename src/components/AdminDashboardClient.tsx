@@ -2,6 +2,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { DollarSign, Package, Truck, Users } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from "recharts";
 
 type propType = {
   earning: {
@@ -13,14 +21,16 @@ type propType = {
     title: string;
     value: number;
   }[];
+  chartData: {
+    day: string;
+    orders: number;
+  }[];
 };
 
-function AdminDashboardClient({ earning, stats = [] }: propType) {
+function AdminDashboardClient({ earning, stats, chartData }: propType) {
   const [filter, setFilter] = useState<"today" | "sevenDays" | "total">(
     "total",
   );
-
-
 
   const currentEarning =
     filter === "today"
@@ -82,6 +92,21 @@ function AdminDashboardClient({ earning, stats = [] }: propType) {
             </motion.div>
           );
         })}
+      </div>
+
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-md p-5 mb-10">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
+          📉 Orders Overview ( Last 7 Days )
+        </h2>
+
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+            <XAxis dataKey={"day"} />
+            <Tooltip />
+            <Bar dataKey={"orders"} fill="#5C5CFF" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
