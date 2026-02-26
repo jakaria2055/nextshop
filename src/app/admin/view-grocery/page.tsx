@@ -2,7 +2,15 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Package, Pencil, Search, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader,
+  Package,
+  Pencil,
+  Search,
+  Upload,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IGrocery } from "@/models/groceryModel";
 import Image from "next/image";
@@ -27,6 +35,9 @@ function ViewGrocery() {
   const [groceries, setGroceries] = useState<IGrocery[]>();
   const [editing, setEditing] = useState<IGrocery | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [backendImage, setBackendImage] = useState<Blob | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const getGroceries = async () => {
@@ -47,6 +58,51 @@ function ViewGrocery() {
       setImagePreview(editing.image);
     }
   }, [editing]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBackendImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleEdit = async () => {
+    setLoading(true);
+    if (!editing) return;
+    try {
+      const formData = new FormData();
+
+      formData.append("groceryId", editing?._id?.toString());
+      formData.append("name", editing?.name);
+      formData.append("category", editing.category);
+      formData.append("price", editing.price);
+      formData.append("unit", editing.unit);
+      if (backendImage) {
+        formData.append("image", backendImage);
+      }
+
+      const result = await axios.post("/api/admin/edit-grocery", formData);
+      setLoading(false);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    if (!editing) return;
+    try {
+      const result = await axios.post("/api/admin/delete-grocery", {
+        groceryId: editing._id,
+      });
+      setDeleteLoading(false);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="pt-4 w-[95%] md:w-[85%] mx-auto pb-10">
@@ -141,9 +197,22 @@ function ViewGrocery() {
                     className="object-cover"
                   />
                 )}
+                <label
+                  htmlFor="imageUpload"
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
+                >
+                  <Upload size={28} className="text-blue-600" />{" "}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  id="imageUpload"
+                  onChange={handleImageUpload}
+                />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <input
                   type="text"
                   placeholder="Enter Grocery Name"
@@ -193,6 +262,30 @@ function ViewGrocery() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="flex justify-end gap-3 mt-3">
+                <button
+                  className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-700 text-white flex items-center gap-2 transition-all duration-300"
+                  onClick={handleEdit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader size={14} className="animate-spin" />
+                  ) : (
+                    "Edit Grocery"
+                  )}
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-700 text-white flex items-center gap-2 transition-all duration-300"
+                  onClick={handleDelete}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? (
+                    <Loader size={14} className="animate-spin" />
+                  ) : (
+                    "Delete Grocery"
+                  )}
+                </button>
               </div>
             </motion.div>
           </motion.div>
