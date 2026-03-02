@@ -8,6 +8,15 @@ import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import DeliveryChat from "./DeliveryChat";
 import { Loader2 } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const LiveMap = dynamic(() => import("./LiveMap"), {
   ssr: false,
@@ -23,7 +32,7 @@ interface ILocation {
   longitude: number;
 }
 
-function DeliveryBoyDashboard() {
+function DeliveryBoyDashboard({ earning }: { earning: number }) {
   const [assignments, setAssignments] = useState<any[]>([]);
   const { userData } = useSelector((state: RootState) => state.user);
   const [activeOrder, setActiveOrder] = useState<any>(null);
@@ -156,11 +165,59 @@ function DeliveryBoyDashboard() {
       setActiveOrder(null);
       setVerifyOtpLoading(false);
       await fetchCurrentOrder();
+      window.location.reload()
     } catch (error) {
       setOtpError("OTP verification error!");
       setVerifyOtpLoading(false);
     }
   };
+
+  if (!activeOrder && assignments.length === 0) {
+    const todayEarning = [
+      {
+        name: "Today",
+        earning,
+        deliveries: earning / 40,
+      },
+    ];
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-white to-green-50 p-6">
+        <div className="max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold">No Active Deliveries. 🛻</h2>
+          <p className="text-gray-500 mb-5">
+            Stay online to receive new orders!{" "}
+          </p>
+
+          <div className="bg-white border rounded-xl shadow-xl p-6">
+            <h2 className="font-medium text-blue-700 mb-2">
+              Today's Performance
+            </h2>
+
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={todayEarning}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="earnings" name="Earning (৳)" />
+                <Bar dataKey="deliveries" name="Deliveries" />
+              </BarChart>
+            </ResponsiveContainer>
+
+            <p className="mt-4 text-lg font-bold text-blue-700">
+              {earning || 0} Earned today
+            </p>
+            <button
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Earning
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (activeOrder && userLocation) {
     return (
@@ -192,7 +249,10 @@ function DeliveryBoyDashboard() {
                 className="w-full py-4 bg-blue-600 text-white rounded-lg text-center hover:bg-blue-700 transform duration-300"
               >
                 {sendOtpLoading ? (
-                  <Loader2 size={16} className="animate-spin text-white text-center" />
+                  <Loader2
+                    size={16}
+                    className="animate-spin text-white text-center"
+                  />
                 ) : (
                   "Mark as Delivered"
                 )}
@@ -214,7 +274,10 @@ function DeliveryBoyDashboard() {
                   className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg"
                 >
                   {verifyOtpLoading ? (
-                    <Loader2 size={16} className="animate-spin text-white text-center" />
+                    <Loader2
+                      size={16}
+                      className="animate-spin text-white text-center"
+                    />
                   ) : (
                     "Verify OTP"
                   )}
