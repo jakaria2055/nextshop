@@ -18,11 +18,12 @@ import mongoose from "mongoose";
 import { AnimatePresence } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
 
 interface IUser {
   _id?: mongoose.Types.ObjectId;
@@ -39,7 +40,9 @@ function Navbar({ user }: { user: IUser }) {
   const profileDropDown = useRef<HTMLDivElement>(null);
   const [searchBarOpen, setSearchBarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const {cartData} = useSelector((state: RootState)=>state.cart)
+  const { cartData } = useSelector((state: RootState) => state.cart);
+  const [search, setSearch] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -59,6 +62,19 @@ function Navbar({ user }: { user: IUser }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open]);
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const query = search.trim();
+
+    if (!query) {
+      return router.push("/");
+    }
+
+    router.push(`/?q=${encodeURIComponent(query)}`);
+    setSearch("");
+    setSearchBarOpen(false);
+  };
 
   const sideBar = menuOpen
     ? createPortal(
@@ -150,10 +166,15 @@ function Navbar({ user }: { user: IUser }) {
       </Link>
 
       {user.role == "user" && (
-        <form className="hidden md:flex items-center bg-white rounded-full px-4 py-2 w-1/2 max-w-lg shadow-md">
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex items-center bg-white rounded-full px-4 py-2 w-1/2 max-w-lg shadow-md"
+        >
           <Search className="text-gray-500 w-5 h-5 mr-2" />
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Meet, Fish, Rice, Milk, Egg..."
             className="w-full outline-none text-gray-700 placeholder-gray-400"
           />
@@ -296,9 +317,11 @@ function Navbar({ user }: { user: IUser }) {
             {searchBarOpen && (
               <motion.div className="fixed top-24 left-1/2 -translate-x-1/2 w-[90%] bg-white rounded-full shadow-lg z-40 flex items-center px-4 py-2">
                 <Search className="text-gray-500 w-5 h-5 mr-2" />
-                <form className="grow">
+                <form className="grow" onSubmit={handleSearch}>
                   <input
                     type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     className="w-full outline-none text-gray-700"
                     placeholder="meet, rice, chips, floor..."
                   />

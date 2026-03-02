@@ -7,7 +7,8 @@ import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import DeliveryChat from "./DeliveryChat";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin, Truck, CheckCircle, XCircle, RefreshCw, DollarSign } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Bar,
   BarChart,
@@ -21,9 +22,22 @@ import {
 const LiveMap = dynamic(() => import("./LiveMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[500px] rounded-xl bg-gray-200 flex items-center justify-center">
-      <p className="text-gray-600">Loading map...</p>
-    </div>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="w-full h-[500px] rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center"
+    >
+      <div className="text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="inline-block mb-2"
+        >
+          <Loader2 className="w-8 h-8 text-blue-600" />
+        </motion.div>
+        <p className="text-blue-700 font-medium">Loading map...</p>
+      </div>
+    </motion.div>
   ),
 });
 
@@ -172,165 +186,414 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
     }
   };
 
+  // No Active Deliveries State
   if (!activeOrder && assignments.length === 0) {
     const todayEarning = [
       {
         name: "Today",
-        earning,
+        earnings: earning,
         deliveries: earning / 40,
       },
     ];
+    
     return (
-      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-white to-green-50 p-6">
-        <div className="max-w-md w-full text-center">
-          <h2 className="text-2xl font-bold">No Active Deliveries. 🛻</h2>
-          <p className="text-gray-500 mb-5">
-            Stay online to receive new orders!{" "}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="mt-20 min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30 flex items-center justify-center p-6 relative overflow-hidden"
+      >
+        {/* Animated background elements */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.1, scale: 1 }}
+          transition={{ duration: 1.5 }}
+          className="absolute top-20 right-20 w-64 h-64 bg-blue-200 rounded-full blur-3xl"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.1, scale: 1 }}
+          transition={{ duration: 1.5, delay: 0.3 }}
+          className="absolute bottom-20 left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl"
+        />
+
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="max-w-md w-full text-center relative z-10"
+        >
+          <motion.div
+            animate={{
+              y: [0, -10, 0],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="inline-block mb-6"
+          >
+            <Truck size={80} className="text-blue-500" />
+          </motion.div>
+          
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent mb-2">
+            No Active Deliveries
+          </h2>
+          <p className="text-gray-500 mb-8">
+            Stay online to receive new orders!
           </p>
 
-          <div className="bg-white border rounded-xl shadow-xl p-6">
-            <h2 className="font-medium text-blue-700 mb-2">
+          <motion.div
+            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-xl p-6"
+          >
+            <h2 className="font-semibold text-blue-700 mb-4 flex items-center justify-center gap-2">
+              <DollarSign size={18} />
               Today's Performance
             </h2>
 
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={todayEarning}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
+                <XAxis dataKey="name" tick={{ fill: '#6b7280' }} />
+                <YAxis tick={{ fill: '#6b7280' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
                 <Legend />
-                <Bar dataKey="earnings" name="Earning (৳)" />
-                <Bar dataKey="deliveries" name="Deliveries" />
+                <Bar dataKey="earnings" name="Earning (৳)" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="deliveries" name="Deliveries" fill="#10b981" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
 
-            <p className="mt-4 text-lg font-bold text-blue-700">
-              {earning || 0} Earned today
-            </p>
-            <button
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+            <motion.p 
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="mt-4 text-2xl font-bold text-blue-700"
+            >
+              ৳ {earning || 0} Earned today
+            </motion.p>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               onClick={() => window.location.reload()}
             >
-              Refresh Earning
-            </button>
-          </div>
-        </div>
-      </div>
+              <RefreshCw size={16} />
+              Refresh Earnings
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     );
   }
 
+  // Active Delivery State
   if (activeOrder && userLocation) {
     return (
-      <div className="p-4 min-h-screen bg-gray-50 pt-24">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-bold text-blue-700 mb-2">
-            Active Delivery
-          </h1>
-          <p className="text-gray-600 text-sm mb-4">
-            Order# {activeOrder.order._id.slice(-6)}
-          </p>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30 p-4 pt-24 relative overflow-hidden"
+      >
+        {/* Animated background elements */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.1, scale: 1 }}
+          transition={{ duration: 1.5 }}
+          className="absolute top-20 right-20 w-64 h-64 bg-blue-200 rounded-full blur-3xl"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.1, scale: 1 }}
+          transition={{ duration: 1.5, delay: 0.3 }}
+          className="absolute bottom-20 left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl"
+        />
 
-          <div className="rounded-xl border shadow-lg overflow-hidden mb-6">
+        <div className="max-w-3xl mx-auto relative z-10">
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="mb-4"
+          >
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+              Active Delivery
+            </h1>
+            <p className="text-gray-600 text-sm flex items-center gap-2">
+              <span>Order #</span>
+              <span className="font-mono font-bold text-blue-700">
+                {activeOrder.order._id.slice(-6).toUpperCase()}
+              </span>
+              <motion.span
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2 h-2 bg-green-500 rounded-full"
+              />
+            </p>
+          </motion.div>
+
+          {/* Map Container */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            className="rounded-2xl border-2 border-blue-100 shadow-xl overflow-hidden mb-6"
+          >
             <LiveMap
               userLocation={userLocation}
               deliveryBoyLocation={deliveryBoyLocation}
             />
-          </div>
+          </motion.div>
 
-          <DeliveryChat
-            orderId={activeOrder.order._id}
-            deliveryBoyId={userData?._id!}
-          />
+          {/* Location Info Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-2 gap-3 mb-6"
+          >
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-blue-100 shadow-md"
+            >
+              <div className="flex items-center gap-2 text-blue-600 mb-1">
+                <MapPin size={14} />
+                <span className="text-xs font-semibold">Customer Location</span>
+              </div>
+              <p className="text-xs text-gray-600 truncate">
+                {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+              </p>
+            </motion.div>
 
-          <div className="mt-6 bg-white rounded-xl border shadow p-6">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-blue-100 shadow-md"
+            >
+              <div className="flex items-center gap-2 text-green-600 mb-1">
+                <Truck size={14} />
+                <span className="text-xs font-semibold">Your Location</span>
+              </div>
+              <p className="text-xs text-gray-600 truncate">
+                {deliveryBoyLocation.latitude.toFixed(4)}, {deliveryBoyLocation.longitude.toFixed(4)}
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Chat Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <DeliveryChat
+              orderId={activeOrder.order._id}
+              deliveryBoyId={userData?._id!}
+            />
+          </motion.div>
+
+          {/* OTP Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-blue-100 shadow-xl p-6"
+          >
             {!activeOrder.order.deliveryOtpVerification && !showOtpBox && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={sendOtp}
-                className="w-full py-4 bg-blue-600 text-white rounded-lg text-center hover:bg-blue-700 transform duration-300"
+                className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl text-center hover:from-blue-600 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-semibold"
               >
                 {sendOtpLoading ? (
-                  <Loader2
-                    size={16}
-                    className="animate-spin text-white text-center"
-                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    Sending OTP...
+                  </div>
                 ) : (
                   "Mark as Delivered"
                 )}
-              </button>
+              </motion.button>
             )}
 
-            {showOtpBox && (
-              <div className="mt-4">
-                <input
-                  type="text"
-                  className="w-full py-3 border rounded-lg text-center"
-                  placeholder="Enter OTP"
-                  maxLength={4}
-                  onChange={(e) => setOtp(e.target.value)}
-                  value={otp}
-                />
-                <button
-                  onClick={verifyOtp}
-                  className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg"
+            <AnimatePresence>
+              {showOtpBox && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 space-y-4"
                 >
-                  {verifyOtpLoading ? (
-                    <Loader2
-                      size={16}
-                      className="animate-spin text-white text-center"
-                    />
-                  ) : (
-                    "Verify OTP"
-                  )}
-                </button>
+                  <motion.input
+                    whileFocus={{ scale: 1.02 }}
+                    type="text"
+                    className="w-full py-3 border-2 border-blue-200 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Enter OTP"
+                    maxLength={4}
+                    onChange={(e) => setOtp(e.target.value)}
+                    value={otp}
+                  />
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={verifyOtp}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-800 transition-all shadow-md hover:shadow-lg"
+                  >
+                    {verifyOtpLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 size={16} className="animate-spin" />
+                        Verifying...
+                      </div>
+                    ) : (
+                      "Verify OTP"
+                    )}
+                  </motion.button>
 
-                {otpError && (
-                  <div className="text-red-500 mt-2">{otpError}</div>
-                )}
-              </div>
-            )}
+                  {otpError && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg"
+                    >
+                      {otpError}
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {activeOrder.order.deliveryOtpVerification && (
-              <div className="text-blue text-center font-bold">
-                Delivery Completed!
-              </div>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-center py-4"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="inline-block mb-2"
+                >
+                  <CheckCircle size={48} className="text-green-500" />
+                </motion.div>
+                <p className="text-green-600 font-bold text-lg">Delivery Completed!</p>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
+  // Assignments List State
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-4 pt-24">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-3 mt-[120px] text-gray-800 ">
-          Delivery Assignments
-        </h2>
-        {assignments.map((a, index) => (
-          <div
-            key={index}
-            className="p-5 bg-white rounded-xl shadow mb-4 border"
-          >
-            <p>
-              <b>Order Id: </b> #{a?.order._id.slice(-6)}
-            </p>
-            <p className="text-gray-600">{a.order.address.fullAddress}</p>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30 p-4 pt-24 relative overflow-hidden"
+    >
+      {/* Animated background elements */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 0.1, scale: 1 }}
+        transition={{ duration: 1.5 }}
+        className="absolute top-20 right-20 w-64 h-64 bg-blue-200 rounded-full blur-3xl"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 0.1, scale: 1 }}
+        transition={{ duration: 1.5, delay: 0.3 }}
+        className="absolute bottom-20 left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl"
+      />
 
-            <div className="flex gap-3 mt-4">
-              <button
-                className="flex-1 bg-blue-600 hover:bg-blue-700  text-white py-2 rounded-lg "
-                onClick={(e) => handleAccept(a._id)}
-              >
-                Accept
-              </button>
-              <button className="flex-1 bg-red-600 hover:bg-red-700  text-white py-2 rounded-lg ">
-                Reject
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="max-w-3xl mx-auto relative z-10">
+        <motion.h2 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent mb-6"
+        >
+          Delivery Assignments
+        </motion.h2>
+
+        <motion.div 
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
+          {assignments.map((a, index) => (
+            <motion.div
+              key={index}
+              variants={{
+                hidden: { y: 20, opacity: 0 },
+                visible: {
+                  y: 0,
+                  opacity: 1,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 12
+                  }
+                }
+              }}
+              whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100 p-5 hover:shadow-xl transition-all"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-semibold">
+                  Order #{a?.order._id.slice(-6).toUpperCase()}
+                </p>
+                <motion.span
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2 h-2 bg-yellow-500 rounded-full"
+                />
+              </div>
+              
+              <p className="text-gray-600 text-sm mb-4 flex items-start gap-2">
+                <MapPin size={14} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                <span>{a.order.address.fullAddress}</span>
+              </p>
+
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  onClick={(e) => handleAccept(a._id)}
+                >
+                  <CheckCircle size={16} />
+                  Accept
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <XCircle size={16} />
+                  Reject
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
