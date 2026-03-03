@@ -1,36 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+````markdown
+# NextShop 🛒
 
-## Getting Started
+**NextShop** is a modern, full-stack grocery e-commerce web application built with *Next.js 16*, *React 19*,
+*TypeScript*, and *MongoDB*. It supports multiple user roles (User, Admin, Delivery Boy), real-time order tracking,
+and a smooth, responsive interface.
 
-First, run the development server:
+---
+
+## Table of Contents
+
+- [Features](#features)  
+- [Tech Stack](#tech-stack)  
+- [Installation](#installation)  
+- [Environment Variables](#environment-variables)  
+- [Available Scripts](#available-scripts)  
+- [Project Structure](#project-structure)  
+- [Future Enhancements](#future-enhancements)  
+- [License](#license)  
+
+---
+
+## Features
+
+### User
+- Browse groceries with search and filter options
+- Place and track orders in real-time
+- Responsive mobile-friendly dashboard
+- Profile management and update mobile/role
+- Realtime chat update with DeliveryBoy
+
+### Admin
+- Add, edit, and view groceries
+- Manage orders and update statuses
+- Admin dashboard analytics
+
+### Delivery Boy
+- Accept assignments
+- Real-time geolocation updates for deliveries
+- Manage current and completed orders
+- Realtime chat update with user
+
+### Common
+- Authentication & authorization with **NextAuth.js**
+- Real-time updates using **Socket.IO**
+- Payment processing via **Stripe**
+- Image uploads via **Cloudinary**
+- Interactive maps with **Leaflet**
+
+---
+
+## Tech Stack
+
+- **Frontend:** Next.js, React, TypeScript, Tailwind CSS  
+- **Backend:** Next.js API Routes, Node.js, Express (via API routes)  
+- **Database:** MongoDB with Mongoose  
+- **Authentication:** NextAuth.js  
+- **Real-Time:** Socket.IO  
+- **Payment:** Stripe API  
+- **Image Hosting:** Cloudinary  
+- **Maps:** Leaflet, react-leaflet  
+
+---
+
+## Installation
+
+1. Clone the repository:  
+
+```bash
+git clone [https://github.com/jakaria2055/nextshop]
+cd nextshop
+````
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables (see below)
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Server will start on: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create a `.env` file in the root directory and add the following variables:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+MONGODB_URL=your_mongodb_connection_string
+AUTH_SECRET=your_nextauth_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+STRIPE_SECRET_KEY=your_stripe_secret_key
+GOOGLE_CLIENT_ID=your google client ID fror nodemailer
+GOOGLE_CLIENT_SECRET=your google client Secret fror nodemailer
+NEXT_BASE_URL="http://localhost:3000"
+STRIPE_WEBHOOK_SECRET=your stripe webhook secret
+## Run_This_for_refresh_WebHook  =  stripe listen --forward-to localhost:3000/api/user/stripe/webhook##
+NEXT_PUBLIC_SOCKET_SERVER=socket server address
+GEMINI_API_KEY=gemini api key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Replace all placeholders with your actual credentials.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Available Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Script          | Description                           |
+| --------------- | ------------------------------------- |
+| `npm run dev`   | Starts the Next.js development server |
+| `npm run build` | Builds the application for production |
+| `npm run start` | Starts the production server          |
+| `npm run lint`  | Runs ESLint for code linting          |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Project Structure
+
+```text
+nextshop/
+├─ public/              # Static assets (images, icons, SVGs)
+├─ src/
+│  ├─ app/              # Next.js pages (User, Admin, Auth, etc.)
+│  ├─ components/       # React components
+│  ├─ lib/              # Database, Cloudinary, Socket helpers
+│  ├─ models/           # Mongoose models
+│  ├─ redux/            # Redux store and slices
+│  ├─ hooks/            # Custom React hooks
+│  ├─ auth.ts           # Authentication helper
+│  ├─ Provider.tsx      # Redux & Context Provider
+│  └─ ...               # Other helper files
+├─ package.json
+├─ tsconfig.json
+├─ tailwind.config.js
+└─ next.config.ts
+```
+
+---
+
+## Future Enhancements
+
+* Implement advanced full-text search for groceries
+* Add reviews and ratings for products
+* Multi-language support (Bangla & English)
+
+---
+
+Made by **Jakaria Ahmed**
+
+```
