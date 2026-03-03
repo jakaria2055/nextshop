@@ -1,10 +1,25 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle, Package, ShoppingBag, Clock } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  Package,
+  ShoppingBag,
+  Clock,
+} from "lucide-react";
 import Link from "next/link";
 
 function OrderSuccess() {
+  const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    setScreenSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -26,29 +41,34 @@ function OrderSuccess() {
         className="absolute bottom-20 left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl"
       />
 
-      {/* Confetti particles */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{
-            x: Math.random() * window.innerWidth,
-            y: -20,
-            opacity: 1,
-          }}
-          animate={{
-            y: window.innerHeight + 100,
-            x: Math.random() * window.innerWidth,
-            rotate: Math.random() * 360,
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: "linear",
-          }}
-          className="absolute w-1 h-1 bg-blue-400 rounded-full"
-        />
-      ))}
+      
+
+      {screenSize.width > 0 &&
+        [...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{
+              x: Math.random() * screenSize.width,
+              y: -20,
+              opacity: 1,
+            }}
+            animate={{
+              y: screenSize.height + 100,
+              x: Math.random() * screenSize.width,
+              rotate: Math.random() * 360,
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+              ease: "linear",
+            }}
+            className="absolute w-1 h-1 bg-blue-400 rounded-full"
+          />
+        ))}
+
+
+
 
       {/* Main Content */}
       <div className="relative z-10 max-w-2xl mx-auto">
@@ -77,7 +97,7 @@ function OrderSuccess() {
           >
             <div className="w-full h-full rounded-full bg-blue-200 blur-xl"></div>
           </motion.div>
-          
+
           <motion.div
             className="absolute inset-0"
             animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.1, 0.3] }}
@@ -146,9 +166,10 @@ function OrderSuccess() {
           transition={{ delay: 0.6 }}
           className="mt-6 text-base md:text-lg max-w-md text-gray-600 text-center mx-auto leading-relaxed"
         >
-          Thank you for shopping with us! Your order has been placed and is being processed.
-          You can track its progress in your{' '}
-          <span className="font-semibold text-blue-600">My Orders</span> section.
+          Thank you for shopping with us! Your order has been placed and is
+          being processed. You can track its progress in your{" "}
+          <span className="font-semibold text-blue-600">My Orders</span>{" "}
+          section.
         </motion.p>
 
         {/* Order Summary Card */}
@@ -160,11 +181,15 @@ function OrderSuccess() {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-600">Order Number</span>
-            <span className="font-mono font-bold text-blue-700">#ORD-{Math.floor(Math.random() * 10000)}</span>
+            <span className="font-mono font-bold text-blue-700">
+              #ORD-{Math.floor(Math.random() * 10000)}
+            </span>
           </div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-600">Order Date</span>
-            <span className="font-semibold text-gray-800">{new Date().toLocaleDateString()}</span>
+            <span className="font-semibold text-gray-800">
+              {new Date().toLocaleDateString()}
+            </span>
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-blue-100">
             <span className="text-gray-600 font-semibold">Status</span>
@@ -210,7 +235,10 @@ function OrderSuccess() {
         >
           <Link href={"/user/my-orders"}>
             <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.3)" }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white text-base font-semibold px-8 py-3 rounded-full shadow-lg transition-all"
             >

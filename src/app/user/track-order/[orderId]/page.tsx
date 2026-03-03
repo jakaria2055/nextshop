@@ -1,8 +1,15 @@
 "use client";
-import { IOrder } from "@/models/orderModel";
 import { RootState } from "@/redux/store";
 import axios from "axios";
-import { ArrowLeft, Loader2, Send, Sparkle, MapPin, Truck, User, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Send,
+  Sparkle,
+  Truck,
+  User,
+  Clock,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -13,10 +20,46 @@ import { IMessage } from "@/models/messageModel";
 import { AnimatePresence } from "motion/react";
 import { motion } from "framer-motion";
 
+export interface IOrder {
+  _id?: string;
+  user: string;
+  items: [
+    {
+      grocery: string;
+      name: string;
+      price: string;
+      unit: string;
+      image: string;
+      quantity: number;
+    },
+  ];
+  isPaid: boolean;
+  totalAmount: number;
+  paymentMethod: "cod" | "online";
+  address: {
+    fullName: string;
+    mobile: string;
+    city: string;
+    state: string;
+    pincode: string;
+    fullAddress: string;
+    latitude: number;
+    longitude: number;
+  };
+  assignment?: string;
+  assignedDeliveryBoy?: string;
+  status: "pending" | "out of delivery" | "delivered";
+  createdAt?: Date;
+  updatedAt?: Date;
+  deliveryOtp: string | null;
+  deliveryOtpVerification: boolean;
+  deliveredAt: Date;
+}
+
 const LiveMap = dynamic(() => import("@/components/LiveMap"), {
   ssr: false,
   loading: () => (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="w-full h-[500px] rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center"
@@ -46,7 +89,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
   const { orderId } = useParams();
   const [order, setOrder] = useState<IOrder>();
   const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState<IMessage>();
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -108,7 +151,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
 
   const sendMsg = () => {
     if (!newMessage.trim()) return;
-    
+
     const socket = getSocket();
     const message = {
       roomId: orderId,
@@ -149,7 +192,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
     setLoading(true);
     try {
       const lastMessage = messages
-        ?.filter((m) => m.senderId !== userData?._id)
+        ?.filter((m) => m.senderId.toString() !== userData?._id)
         ?.at(-1);
       const result = await axios.post(`/api/chat/ai-suggestions`, {
         message: lastMessage?.text,
@@ -208,7 +251,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
           >
             <ArrowLeft size={20} className="text-blue-700" />
           </motion.button>
-          
+
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -218,7 +261,9 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
               Track Order
             </h2>
             <p className="text-sm text-gray-600 flex items-center gap-2">
-              <span>Order #{order?._id?.toString().slice(-6).toUpperCase()}</span>
+              <span>
+                Order #{order?._id?.toString().slice(-6).toUpperCase()}
+              </span>
               <motion.span
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -226,8 +271,8 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                   order?.status === "out of delivery"
                     ? "bg-blue-100 text-blue-700"
                     : order?.status === "delivered"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
                 }`}
               >
                 {order?.status}
@@ -242,7 +287,9 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            whileHover={{
+              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+            }}
             className="rounded-3xl overflow-hidden border-2 border-blue-100 shadow-xl"
           >
             <LiveMap
@@ -267,7 +314,8 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                 <span className="text-xs font-semibold">Your Location</span>
               </div>
               <p className="text-xs text-gray-600 truncate">
-                {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                {userLocation.latitude.toFixed(4)},{" "}
+                {userLocation.longitude.toFixed(4)}
               </p>
             </motion.div>
 
@@ -280,7 +328,8 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                 <span className="text-xs font-semibold">Delivery Boy</span>
               </div>
               <p className="text-xs text-gray-600 truncate">
-                {deliveryBoyLocation.latitude.toFixed(4)}, {deliveryBoyLocation.longitude.toFixed(4)}
+                {deliveryBoyLocation.latitude.toFixed(4)},{" "}
+                {deliveryBoyLocation.longitude.toFixed(4)}
               </p>
             </motion.div>
           </motion.div>
@@ -293,7 +342,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
             className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-100 p-4 h-[450px] flex flex-col"
           >
             {/* AI Chat Header */}
-            <motion.div 
+            <motion.div
               className="flex justify-between items-center mb-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -303,7 +352,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                 <Clock size={14} className="text-blue-600" />
                 Quick Replies
               </span>
-              
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -367,7 +416,9 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                     >
                       <Send size={24} className="text-blue-400" />
                     </motion.div>
-                    <p className="text-sm text-gray-500">No messages yet. Start the conversation!</p>
+                    <p className="text-sm text-gray-500">
+                      No messages yet. Start the conversation!
+                    </p>
                   </motion.div>
                 ) : (
                   messages?.map((msg, index) => (
@@ -376,22 +427,30 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                       initial={{ opacity: 0, y: 20, scale: 0.8 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className={`flex ${msg.senderId == userData?._id ? "justify-end" : "justify-start"}`}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
+                      className={`flex ${msg.senderId.toString() == userData?._id ? "justify-end" : "justify-start"}`}
                     >
                       <motion.div
                         whileHover={{ scale: 1.02 }}
                         className={`px-4 py-2 max-w-[75%] rounded-2xl shadow-md 
                           ${
-                            msg.senderId === userData?._id
+                            msg.senderId.toString() === userData?._id
                               ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-none"
                               : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
                           }`}
                       >
                         <p className="text-sm break-words">{msg.text}</p>
-                        <p className={`text-[10px] mt-1 text-right ${
-                          msg.senderId === userData?._id ? "text-blue-100" : "text-gray-400"
-                        }`}>
+                        <p
+                          className={`text-[10px] mt-1 text-right ${
+                            msg.senderId.toString() === userData?._id
+                              ? "text-blue-100"
+                              : "text-gray-400"
+                          }`}
+                        >
                           {msg.time}
                         </p>
                       </motion.div>
@@ -402,7 +461,7 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
             </div>
 
             {/* Message Input */}
-            <motion.div 
+            <motion.div
               className="flex gap-2 mt-3 border-t border-blue-100 pt-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -430,13 +489,13 @@ function TrackOrder({ params }: { params: { orderId: string } }) {
                   </motion.span>
                 )}
               </motion.div>
-              
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`p-3 rounded-xl text-white transition-all ${
-                  newMessage.trim() 
-                    ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-md hover:shadow-lg" 
+                  newMessage.trim()
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-md hover:shadow-lg"
                     : "bg-gray-400 cursor-not-allowed"
                 }`}
                 onClick={sendMsg}

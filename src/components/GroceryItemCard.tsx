@@ -1,5 +1,4 @@
 "use client";
-import mongoose from "mongoose";
 import { motion } from "framer-motion";
 import React from "react";
 import Image from "next/image";
@@ -9,7 +8,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { addToCart, increaseQuantity, decreaseQuantity } from "@/redux/cartSlice";
 
 interface IGrocery {
-  _id: mongoose.Types.ObjectId;
+  _id: string;
   name: string;
   category: string;
   price: string;
@@ -22,7 +21,7 @@ interface IGrocery {
 function GroceryItemCard({ item }: { item: IGrocery }) {
   const dispatch = useDispatch<AppDispatch>();
   const { cartData } = useSelector((state: RootState) => state.cart);
-  const cartItem = cartData.find((i) => i._id == item._id);
+  const cartItem = cartData.find((i) => i._id.toString() == item._id);
 
   return (
     <motion.div

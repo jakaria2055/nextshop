@@ -14,7 +14,6 @@ import {
   X,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import mongoose from "mongoose";
 import { AnimatePresence } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +25,7 @@ import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 
 interface IUser {
-  _id?: mongoose.Types.ObjectId;
+  _id?: string;
   name: string;
   email: string;
   password?: string;
@@ -145,7 +144,7 @@ function Navbar({ user }: { user: IUser }) {
             <div className="my-5 border-t border-white/20"></div>
             <div
               className="flex items-center gap-3 text-red-300 font-semibold mt-auto hover:bg-red-500/20 p-3 rounded-lg    transition-all"
-              onClick={async () => signOut({ callBackUrl: "/" })}
+              onClick={async () => signOut({ callbackUrl: "/" })}
             >
               <LogOutIcon className="w-5 h-5 text-red-300" />
               Logout

@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import {
   ArrowLeft,
   Loader,
@@ -42,7 +42,7 @@ function ViewGrocery() {
   const [backendImage, setBackendImage] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [filtered, setFiltered] = useState<IGrocery[]>()
+  const [filtered, setFiltered] = useState<IGrocery[]>();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -112,56 +112,64 @@ function ViewGrocery() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const q = search.toLowerCase()
+    const q = search.toLowerCase();
 
     let filteredList = groceries?.filter(
-      (g) => g.name.toLowerCase().includes(q) || g.category.toLowerCase().includes(q)
-    )
+      (g) =>
+        g.name.toLowerCase().includes(q) ||
+        g.category.toLowerCase().includes(q),
+    );
 
     // Apply category filter
     if (selectedCategory !== "all") {
-      filteredList = filteredList?.filter(g => g.category === selectedCategory);
+      filteredList = filteredList?.filter(
+        (g) => g.category === selectedCategory,
+      );
     }
 
-    setFiltered(filteredList)
-  }
+    setFiltered(filteredList);
+  };
 
   // Apply filters whenever search or category changes
   useEffect(() => {
     if (groceries) {
       let filteredList = groceries;
-      
+
       // Apply search filter
       if (search) {
         const q = search.toLowerCase();
         filteredList = filteredList.filter(
-          (g) => g.name.toLowerCase().includes(q) || g.category.toLowerCase().includes(q)
+          (g) =>
+            g.name.toLowerCase().includes(q) ||
+            g.category.toLowerCase().includes(q),
         );
       }
-      
+
       // Apply category filter
       if (selectedCategory !== "all") {
-        filteredList = filteredList.filter(g => g.category === selectedCategory);
+        filteredList = filteredList.filter(
+          (g) => g.category === selectedCategory,
+        );
       }
-      
+
       setFiltered(filteredList);
     }
   }, [search, selectedCategory, groceries]);
 
   // Animation variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -169,9 +177,9 @@ function ViewGrocery() {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 12
-      }
-    }
+        damping: 12,
+      },
+    },
   };
 
   return (
@@ -195,14 +203,14 @@ function ViewGrocery() {
         className="absolute bottom-20 left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl -z-10"
       />
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10"
       >
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 text-center sm:text-left"
         >
@@ -215,20 +223,20 @@ function ViewGrocery() {
             <ArrowLeft size={18} />
             <span>Back to Dashboard</span>
           </motion.button>
-          
-          <motion.h2 
+
+          <motion.h2
             variants={itemVariants}
             className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent flex items-center justify-center gap-2"
           >
             <motion.div
               animate={{
                 rotate: [0, 5, -5, 0],
-                scale: [1, 1.1, 1]
+                scale: [1, 1.1, 1],
               }}
               transition={{
                 duration: 3,
                 repeat: Infinity,
-                repeatType: "loop"
+                repeatType: "loop",
               }}
             >
               <Package size={28} className="text-blue-600" />
@@ -238,12 +246,12 @@ function ViewGrocery() {
         </motion.div>
 
         {/* Search and Filter Section */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="flex flex-col md:flex-row gap-3 items-center mb-10 max-w-lg mx-auto w-full"
         >
-          <motion.form 
-            onSubmit={handleSearch} 
+          <motion.form
+            onSubmit={handleSearch}
             className="flex-1 flex items-center bg-white border border-blue-100 rounded-full px-5 py-3 shadow-md hover:shadow-lg transition-all w-full"
             whileFocus={{ scale: 1.02 }}
           >
@@ -284,7 +292,9 @@ function ViewGrocery() {
               >
                 <option value="all">All Categories</option>
                 {categories.map((cat, i) => (
-                  <option key={i} value={cat}>{cat}</option>
+                  <option key={i} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </motion.div>
@@ -292,10 +302,7 @@ function ViewGrocery() {
         </AnimatePresence>
 
         {/* Grocery List */}
-        <motion.div 
-          variants={containerVariants}
-          className="space-y-4"
-        >
+        <motion.div variants={containerVariants} className="space-y-4">
           <AnimatePresence mode="popLayout">
             {filtered?.length === 0 ? (
               <motion.div
@@ -316,8 +323,12 @@ function ViewGrocery() {
                 >
                   <Package className="w-12 h-12 text-blue-400" />
                 </motion.div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Items Found</h3>
-                <p className="text-gray-400">Try adjusting your search or filter</p>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  No Items Found
+                </h3>
+                <p className="text-gray-400">
+                  Try adjusting your search or filter
+                </p>
               </motion.div>
             ) : (
               filtered?.map((g, i) => (
@@ -327,11 +338,14 @@ function ViewGrocery() {
                   initial="hidden"
                   animate="visible"
                   exit={{ opacity: 0, y: -20 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+                  whileHover={{
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+                  }}
                   layout
                   className="bg-white rounded-2xl shadow-md hover:shadow-xl border border-blue-100 flex flex-col sm:flex-row gap-5 p-5 sm:items-start items-center transition-all"
                 >
-                  <motion.div 
+                  <motion.div
                     className="relative w-full sm:w-44 aspect-square rounded-xl overflow-hidden border-2 border-blue-100 group"
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
@@ -349,7 +363,7 @@ function ViewGrocery() {
                       <h3 className="font-semibold text-gray-800 text-lg truncate">
                         {g.name}
                       </h3>
-                      <motion.p 
+                      <motion.p
                         className="text-blue-600 text-sm capitalize bg-blue-50 inline-block px-3 py-1 rounded-full mt-1"
                         whileHover={{ scale: 1.05 }}
                       >
@@ -401,7 +415,7 @@ function ViewGrocery() {
               className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-7 relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <motion.div 
+              <motion.div
                 className="flex justify-between items-center mb-4"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -460,7 +474,7 @@ function ViewGrocery() {
                 />
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -521,7 +535,7 @@ function ViewGrocery() {
                 </motion.select>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 className="flex justify-end gap-3 mt-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -537,7 +551,11 @@ function ViewGrocery() {
                   {loading ? (
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     >
                       <Loader size={14} className="animate-spin" />
                     </motion.div>
@@ -558,7 +576,11 @@ function ViewGrocery() {
                   {deleteLoading ? (
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     >
                       <Loader size={14} className="animate-spin" />
                     </motion.div>

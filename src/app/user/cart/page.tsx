@@ -112,7 +112,7 @@ function Cart() {
               <AnimatePresence mode="popLayout">
                 {cartData.map((item, index) => (
                   <motion.div
-                    key={item._id}
+                    key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}

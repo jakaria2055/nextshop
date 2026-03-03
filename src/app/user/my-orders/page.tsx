@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   ArrowLeft,
   PackageSearch,
-  ShoppingBagIcon,
   ShoppingBag,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,15 +11,14 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import UserOrderCard from "@/components/UserOrderCard";
 import { getSocket } from "@/lib/socket";
-import mongoose from "mongoose";
 import { IUser } from "@/models/userModel";
 
 export interface IOrder {
-  _id?: mongoose.Types.ObjectId;
-  user: mongoose.Types.ObjectId;
+  _id?: string;
+  user: string;
   items: [
     {
-      grocery: mongoose.Types.ObjectId;
+      grocery: string;
       name: string;
       price: string;
       unit: string;
@@ -41,7 +39,7 @@ export interface IOrder {
     latitude: number;
     longitude: number;
   };
-  assignment?: mongoose.Types.ObjectId;
+  assignment?: string;
   assignedDeliveryBoy?: IUser;
   status: "pending" | "out of delivery" | "delivered";
   createdAt?: Date;

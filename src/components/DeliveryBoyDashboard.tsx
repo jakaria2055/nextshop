@@ -7,7 +7,15 @@ import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import DeliveryChat from "./DeliveryChat";
-import { Loader2, MapPin, Truck, CheckCircle, XCircle, RefreshCw, DollarSign } from "lucide-react";
+import {
+  Loader2,
+  MapPin,
+  Truck,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  DollarSign,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bar,
@@ -22,7 +30,7 @@ import {
 const LiveMap = dynamic(() => import("./LiveMap"), {
   ssr: false,
   loading: () => (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="w-full h-[500px] rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center"
@@ -148,10 +156,17 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
     return () => socket.off("update-deliveryBoy-location");
   }, []);
 
+
   useEffect(() => {
-    fetchCurrentOrder();
-    fetchAssignments();
+    if (!userData) return;
+    const fetchData = async () => {
+      await fetchCurrentOrder();
+      await fetchAssignments();
+    };
+
+    fetchData();
   }, [userData]);
+
 
   const sendOtp = async () => {
     setSendOtpLoading(true);
@@ -179,7 +194,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
       setActiveOrder(null);
       setVerifyOtpLoading(false);
       await fetchCurrentOrder();
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
       setOtpError("OTP verification error!");
       setVerifyOtpLoading(false);
@@ -195,7 +210,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
         deliveries: earning / 40,
       },
     ];
-    
+
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -233,7 +248,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
           >
             <Truck size={80} className="text-blue-500" />
           </motion.div>
-          
+
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent mb-2">
             No Active Deliveries
           </h2>
@@ -242,40 +257,52 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
           </p>
 
           <motion.div
-            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            whileHover={{
+              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+            }}
             className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-xl p-6"
           >
             <h2 className="font-semibold text-blue-700 mb-4 flex items-center justify-center gap-2">
               <DollarSign size={18} />
-              Today's Performance
+              {"Today's Performance"}
             </h2>
 
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={todayEarning}>
-                <XAxis dataKey="name" tick={{ fill: '#6b7280' }} />
-                <YAxis tick={{ fill: '#6b7280' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                <XAxis dataKey="name" tick={{ fill: "#6b7280" }} />
+                <YAxis tick={{ fill: "#6b7280" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
                 />
                 <Legend />
-                <Bar dataKey="earnings" name="Earning (৳)" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="deliveries" name="Deliveries" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="earnings"
+                  name="Earning (৳)"
+                  fill="#2563eb"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="deliveries"
+                  name="Deliveries"
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
 
-            <motion.p 
+            <motion.p
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="mt-4 text-2xl font-bold text-blue-700"
             >
               ৳ {earning || 0} Earned today
             </motion.p>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -341,7 +368,9 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            whileHover={{
+              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+            }}
             className="rounded-2xl border-2 border-blue-100 shadow-xl overflow-hidden mb-6"
           >
             <LiveMap
@@ -366,7 +395,8 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                 <span className="text-xs font-semibold">Customer Location</span>
               </div>
               <p className="text-xs text-gray-600 truncate">
-                {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                {userLocation.latitude.toFixed(4)},{" "}
+                {userLocation.longitude.toFixed(4)}
               </p>
             </motion.div>
 
@@ -379,7 +409,8 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                 <span className="text-xs font-semibold">Your Location</span>
               </div>
               <p className="text-xs text-gray-600 truncate">
-                {deliveryBoyLocation.latitude.toFixed(4)}, {deliveryBoyLocation.longitude.toFixed(4)}
+                {deliveryBoyLocation.latitude.toFixed(4)},{" "}
+                {deliveryBoyLocation.longitude.toFixed(4)}
               </p>
             </motion.div>
           </motion.div>
@@ -390,10 +421,12 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <DeliveryChat
-              orderId={activeOrder.order._id}
-              deliveryBoyId={userData?._id!}
-            />
+            {userData?._id && (
+              <DeliveryChat
+                orderId={activeOrder.order._id}
+                deliveryBoyId={userData._id.toString()}
+              />
+            )}
           </motion.div>
 
           {/* OTP Section */}
@@ -438,7 +471,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                     onChange={(e) => setOtp(e.target.value)}
                     value={otp}
                   />
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -481,7 +514,9 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                 >
                   <CheckCircle size={48} className="text-green-500" />
                 </motion.div>
-                <p className="text-green-600 font-bold text-lg">Delivery Completed!</p>
+                <p className="text-green-600 font-bold text-lg">
+                  Delivery Completed!
+                </p>
               </motion.div>
             )}
           </motion.div>
@@ -513,7 +548,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
       />
 
       <div className="max-w-3xl mx-auto relative z-10">
-        <motion.h2 
+        <motion.h2
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent mb-6"
@@ -521,15 +556,15 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
           Delivery Assignments
         </motion.h2>
 
-        <motion.div 
+        <motion.div
           variants={{
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.1
-              }
-            }
+                staggerChildren: 0.1,
+              },
+            },
           }}
           initial="hidden"
           animate="visible"
@@ -546,11 +581,14 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                   transition: {
                     type: "spring",
                     stiffness: 100,
-                    damping: 12
-                  }
-                }
+                    damping: 12,
+                  },
+                },
               }}
-              whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+              whileHover={{
+                scale: 1.02,
+                boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+              }}
               className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100 p-5 hover:shadow-xl transition-all"
             >
               <div className="flex items-center justify-between mb-3">
@@ -563,9 +601,12 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                   className="w-2 h-2 bg-yellow-500 rounded-full"
                 />
               </div>
-              
+
               <p className="text-gray-600 text-sm mb-4 flex items-start gap-2">
-                <MapPin size={14} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                <MapPin
+                  size={14}
+                  className="text-blue-600 mt-0.5 flex-shrink-0"
+                />
                 <span>{a.order.address.fullAddress}</span>
               </p>
 
@@ -579,7 +620,7 @@ function DeliveryBoyDashboard({ earning }: { earning: number }) {
                   <CheckCircle size={16} />
                   Accept
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

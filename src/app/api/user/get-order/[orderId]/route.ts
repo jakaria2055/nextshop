@@ -2,10 +2,10 @@ import connectDB from "@/lib/db";
 import Order from "@/models/orderModel";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req:NextRequest, { params }: { params: { orderId: string } }) {
+export async function GET(req:NextRequest, context: { params: Promise<{ orderId: string; }>; }) {
   try {
     await connectDB();
-    const {orderId} = await params;
+    const {orderId} = await context.params;
     const order = await Order.findById(orderId).populate("assignedDeliveryBoy");
     if (!order) {
       return NextResponse.json(

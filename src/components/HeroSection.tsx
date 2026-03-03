@@ -2,14 +2,16 @@
 import { Leaf, ShoppingBasketIcon, Smartphone, Truck } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import Image from "next/image";
 
 function HeroSection() {
   const slides = [
     {
       id: 1,
-      icon: <Leaf className="w-20 h-20 sm:w-28 sm:h-28 text-green-400 drop-shadow-lg" />,
+      icon: (
+        <Leaf className="w-20 h-20 sm:w-28 sm:h-28 text-green-400 drop-shadow-lg" />
+      ),
       title: "Fresh natural Groceries",
       subtitle:
         "Fresh fruits, vegetables, meat, chicken and daily essentials delivered to you.",
@@ -19,7 +21,9 @@ function HeroSection() {
     },
     {
       id: 2,
-      icon: <Truck className="w-20 h-20 sm:w-28 sm:h-28 text-blue-400 drop-shadow-lg" />,
+      icon: (
+        <Truck className="w-20 h-20 sm:w-28 sm:h-28 text-blue-400 drop-shadow-lg" />
+      ),
       title: "Fast & Reliable Delivery",
       subtitle:
         "Get your groceries delivered quickly and safely, right to your doorstep.",
@@ -29,7 +33,9 @@ function HeroSection() {
     },
     {
       id: 3,
-      icon: <Smartphone className="w-20 h-20 sm:w-28 sm:h-28 text-purple-400 drop-shadow-lg" />,
+      icon: (
+        <Smartphone className="w-20 h-20 sm:w-28 sm:h-28 text-purple-400 drop-shadow-lg" />
+      ),
       title: "Shop Anytime Anywhere",
       subtitle:
         "Convenient shopping experience from your phone, tablet, or computer—anytime you want.",
@@ -45,12 +51,12 @@ function HeroSection() {
 
   useEffect(() => {
     if (isHovered) return;
-    
+
     const timer = setInterval(() => {
       setDirection(1);
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 5000);
-    
+
     return () => clearInterval(timer);
   }, [slides.length, isHovered]);
 
@@ -65,37 +71,37 @@ function HeroSection() {
   };
 
   // Animation variants
-  const slideVariants = {
+  const slideVariants: Variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 1000 : -1000,
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1
+      opacity: 1,
     },
     exit: (direction: number) => ({
       zIndex: 0,
       x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
+      opacity: 0,
+    }),
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut"
-      }
-    }
+        ease: [0.25, 0.1, 0.25, 1],
+      },
+    },
   };
 
   return (
-    <div 
+    <div
       className="relative w-[98%] mx-auto mt-28 h-[85vh] rounded-3xl overflow-hidden shadow-2xl group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -111,7 +117,7 @@ function HeroSection() {
           exit="exit"
           transition={{
             x: { type: "spring", stiffness: 300, damping: 30 },
-            opacity: { duration: 0.4 }
+            opacity: { duration: 0.4 },
           }}
           className="absolute inset-0"
         >
@@ -139,11 +145,21 @@ function HeroSection() {
               onClick={handlePrev}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 backdrop-blur-md hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all border border-white/30"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </motion.button>
-            
+
             <motion.button
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -153,8 +169,18 @@ function HeroSection() {
               onClick={handleNext}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 backdrop-blur-md hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all border border-white/30"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </motion.button>
           </>
@@ -163,7 +189,7 @@ function HeroSection() {
 
       {/* Content */}
       <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4 z-20">
-        <motion.div 
+        <motion.div
           key={current}
           initial="hidden"
           animate="visible"
@@ -172,14 +198,14 @@ function HeroSection() {
         >
           {/* Icon with Glassmorphism Effect */}
           <motion.div
-            animate={{ 
+            animate={{
               y: [0, -10, 0],
-              rotate: [0, 5, -5, 0]
+              rotate: [0, 5, -5, 0],
             }}
-            transition={{ 
+            transition={{
               duration: 3,
               repeat: Infinity,
-              repeatType: "loop"
+              repeatType: "loop",
             }}
             className="relative"
           >
@@ -187,13 +213,11 @@ function HeroSection() {
             <div className="relative backdrop-blur-xl bg-white/10 p-8 rounded-full shadow-2xl border border-white/30">
               {/* Inner glow */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-              
+
               {/* Icon */}
-              <div className="relative z-10">
-                {slides[current].icon}
-              </div>
+              <div className="relative z-10">{slides[current].icon}</div>
             </div>
-            
+
             {/* Outer glow rings */}
             <motion.div
               animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] }}
@@ -203,7 +227,7 @@ function HeroSection() {
           </motion.div>
 
           {/* Title with gradient */}
-          <motion.h1 
+          <motion.h1
             variants={textVariants}
             className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg"
           >
@@ -211,7 +235,7 @@ function HeroSection() {
           </motion.h1>
 
           {/* Subtitle */}
-          <motion.p 
+          <motion.p
             variants={textVariants}
             transition={{ delay: 0.2 }}
             className="text-lg sm:text-xl text-gray-200 max-w-2xl leading-relaxed drop-shadow"
@@ -223,7 +247,10 @@ function HeroSection() {
           <motion.button
             variants={textVariants}
             transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(255,255,255,0.3)" }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 10px 25px -5px rgba(255,255,255,0.3)",
+            }}
             whileTap={{ scale: 0.95 }}
             className={`mt-4 bg-gradient-to-r ${slides[current].color} text-white px-8 py-3.5 rounded-full font-semibold shadow-lg transition-all flex items-center gap-2 border border-white/20`}
           >

@@ -5,16 +5,15 @@ import { ArrowLeft, Package, Clock, CheckCircle, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AdminOrderCard from "@/components/AdminOrderCard";
 import { getSocket } from "@/lib/socket";
-import mongoose from "mongoose";
 import { IUser } from "@/models/userModel";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface IOrder {
-  _id?: mongoose.Types.ObjectId;
-  user: mongoose.Types.ObjectId;
+  _id?: string;
+  user: string;
   items: [
     {
-      grocery: mongoose.Types.ObjectId;
+      grocery: string;
       name: string;
       price: string;
       unit: string;
@@ -35,7 +34,7 @@ export interface IOrder {
     latitude: number;
     longitude: number;
   };
-  assignment?: mongoose.Types.ObjectId;
+  assignment?: string;
   assignedDeliveryBoy?: IUser;
   status: "pending" | "out of delivery" | "delivered";
   createdAt?: Date;
@@ -45,7 +44,9 @@ export interface IOrder {
 function ManageOrders() {
   const [orders, setOrders] = useState<IOrder[]>();
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "pending" | "out of delivery" | "delivered">("all");
+  const [filter, setFilter] = useState<
+    "all" | "pending" | "out of delivery" | "delivered"
+  >("all");
   const router = useRouter();
 
   useEffect(() => {
@@ -82,16 +83,17 @@ function ManageOrders() {
   }, []);
 
   // Filter orders based on status
-  const filteredOrders = orders?.filter(order => 
-    filter === "all" ? true : order.status === filter
+  const filteredOrders = orders?.filter((order) =>
+    filter === "all" ? true : order.status === filter,
   );
 
   // Statistics
   const stats = {
     total: orders?.length || 0,
-    pending: orders?.filter(o => o.status === "pending").length || 0,
-    outForDelivery: orders?.filter(o => o.status === "out of delivery").length || 0,
-    delivered: orders?.filter(o => o.status === "delivered").length || 0
+    pending: orders?.filter((o) => o.status === "pending").length || 0,
+    outForDelivery:
+      orders?.filter((o) => o.status === "out of delivery").length || 0,
+    delivered: orders?.filter((o) => o.status === "delivered").length || 0,
   };
 
   return (
@@ -114,7 +116,7 @@ function ManageOrders() {
         transition={{ duration: 1.5, delay: 0.3 }}
         className="absolute bottom-0 left-0 w-80 h-80 bg-blue-300 rounded-full blur-3xl"
       />
-      
+
       {/* HEADERS */}
       <motion.div
         initial={{ y: -100 }}
@@ -132,7 +134,7 @@ function ManageOrders() {
             >
               <ArrowLeft size={24} className="text-blue-600" />
             </motion.button>
-            <motion.h1 
+            <motion.h1
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -151,7 +153,9 @@ function ManageOrders() {
               className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl border border-blue-100"
             >
               <Package className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700">Total: {stats.total}</span>
+              <span className="text-sm font-medium text-blue-700">
+                Total: {stats.total}
+              </span>
             </motion.div>
             <motion.div
               initial={{ scale: 0 }}
@@ -160,7 +164,9 @@ function ManageOrders() {
               className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-100"
             >
               <Clock className="w-4 h-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-700">Pending: {stats.pending}</span>
+              <span className="text-sm font-medium text-yellow-700">
+                Pending: {stats.pending}
+              </span>
             </motion.div>
             <motion.div
               initial={{ scale: 0 }}
@@ -169,7 +175,9 @@ function ManageOrders() {
               className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl border border-blue-100"
             >
               <Truck className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700">Out: {stats.outForDelivery}</span>
+              <span className="text-sm font-medium text-blue-700">
+                Out: {stats.outForDelivery}
+              </span>
             </motion.div>
             <motion.div
               initial={{ scale: 0 }}
@@ -178,7 +186,9 @@ function ManageOrders() {
               className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-xl border border-green-100"
             >
               <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-green-700">Delivered: {stats.delivered}</span>
+              <span className="text-sm font-medium text-green-700">
+                Delivered: {stats.delivered}
+              </span>
             </motion.div>
           </div>
         </div>
@@ -192,34 +202,40 @@ function ManageOrders() {
           transition={{ delay: 0.2 }}
           className="flex flex-wrap gap-2 justify-center md:justify-start"
         >
-          {["all", "pending", "out of delivery", "delivered"].map((status, index) => (
-            <motion.button
-              key={status}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1 * index, type: "spring" }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setFilter(status as any)}
-              className={`px-4 py-2 rounded-xl font-medium text-sm transition-all shadow-sm ${
-                filter === status
-                  ? status === "pending"
-                    ? "bg-yellow-500 text-white shadow-yellow-200"
-                    : status === "out of delivery"
-                    ? "bg-blue-500 text-white shadow-blue-200"
-                    : status === "delivered"
-                    ? "bg-green-500 text-white shadow-green-200"
-                    : "bg-blue-600 text-white shadow-blue-200"
-                  : "bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-              }`}
-            >
-              {status === "all" ? "All Orders" : status === "out of delivery" ? "Out for Delivery" : status.charAt(0).toUpperCase() + status.slice(1)}
-            </motion.button>
-          ))}
+          {["all", "pending", "out of delivery", "delivered"].map(
+            (status, index) => (
+              <motion.button
+                key={status}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1 * index, type: "spring" }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setFilter(status as any)}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all shadow-sm ${
+                  filter === status
+                    ? status === "pending"
+                      ? "bg-yellow-500 text-white shadow-yellow-200"
+                      : status === "out of delivery"
+                        ? "bg-blue-500 text-white shadow-blue-200"
+                        : status === "delivered"
+                          ? "bg-green-500 text-white shadow-green-200"
+                          : "bg-blue-600 text-white shadow-blue-200"
+                    : "bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                }`}
+              >
+                {status === "all"
+                  ? "All Orders"
+                  : status === "out of delivery"
+                    ? "Out for Delivery"
+                    : status.charAt(0).toUpperCase() + status.slice(1)}
+              </motion.button>
+            ),
+          )}
         </motion.div>
 
         {/* Orders List */}
-        <motion.div 
+        <motion.div
           className="space-y-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -267,8 +283,13 @@ function ManageOrders() {
                 >
                   <Package className="w-12 h-12 text-blue-400" />
                 </motion.div>
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Orders Found</h3>
-                <p className="text-gray-400">There are no {filter === "all" ? "" : filter} orders to display</p>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  No Orders Found
+                </h3>
+                <p className="text-gray-400">
+                  There are no {filter === "all" ? "" : filter} orders to
+                  display
+                </p>
               </motion.div>
             ) : (
               filteredOrders?.map((order, index) => (
@@ -277,11 +298,11 @@ function ManageOrders() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ 
+                  transition={{
                     type: "spring",
                     stiffness: 100,
                     damping: 12,
-                    delay: index * 0.1 
+                    delay: index * 0.1,
                   }}
                   whileHover={{ scale: 1.01 }}
                   className="transform-gpu"

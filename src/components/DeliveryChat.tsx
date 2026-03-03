@@ -2,20 +2,19 @@ import { getSocket } from "@/lib/socket";
 import { IMessage } from "@/models/messageModel";
 import axios from "axios";
 import { Loader2, Send, Sparkle, Clock } from "lucide-react";
-import mongoose from "mongoose";
 import { AnimatePresence } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 type props = {
-  orderId: mongoose.Types.ObjectId;
-  deliveryBoyId: mongoose.Types.ObjectId;
+  orderId: string;
+  deliveryBoyId: string;
 };
 
 function DeliveryChat({ orderId, deliveryBoyId }: props) {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<IMessage>();
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -77,7 +76,7 @@ function DeliveryChat({ orderId, deliveryBoyId }: props) {
     setLoading(true);
     try {
       const lastMessage = messages
-        ?.filter((m) => m.senderId !== deliveryBoyId)
+        ?.filter((m) => m.senderId.toString() !== deliveryBoyId)
         ?.at(-1);
       const result = await axios.post(`/api/chat/ai-suggestions`, {
         message: lastMessage?.text,
@@ -190,20 +189,20 @@ function DeliveryChat({ orderId, deliveryBoyId }: props) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className={`flex ${msg.senderId == deliveryBoyId ? "justify-end" : "justify-start"}`}
+                className={`flex ${msg.senderId.toString() == deliveryBoyId ? "justify-end" : "justify-start"}`}
               >
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className={`px-4 py-2 max-w-[75%] rounded-2xl shadow-md 
                     ${
-                      msg.senderId === deliveryBoyId
+                      msg.senderId.toString() === deliveryBoyId
                         ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
                     }`}
                 >
                   <p className="text-sm break-words">{msg.text}</p>
                   <p className={`text-[10px] mt-1 text-right ${
-                    msg.senderId === deliveryBoyId ? "text-blue-100" : "text-gray-400"
+                    msg.senderId.toString() === deliveryBoyId ? "text-blue-100" : "text-gray-400"
                   }`}>
                     {msg.time}
                   </p>

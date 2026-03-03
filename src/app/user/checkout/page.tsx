@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Building,
@@ -20,16 +20,12 @@ import {
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import L, { LatLngExpression } from "leaflet";
-import "leaflet/dist/leaflet.css";
 import axios from "axios";
-import { OpenStreetMapProvider } from "leaflet-geosearch";
 
-const markerIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/128/14831/14831599.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
+import dynamic from "next/dynamic";
+
+const CheckOutMap = dynamic(() => import("@/components/CheckoutMap"), {
+  ssr: false,
 });
 
 function Checkout() {
@@ -79,34 +75,11 @@ function Checkout() {
     }
   }, [userData]);
 
-  // DRAGABLE LOCATION ICON FOR SET LOCATION
-  const DraggableMarker: React.FC = () => {
-    const map = useMap();
-    useEffect(() => {
-      if (position) {
-        map.setView(position as LatLngExpression, 15, { animate: true });
-      }
-    }, [position, map]);
-    return position ? (
-      <Marker
-        icon={markerIcon}
-        position={position as LatLngExpression}
-        draggable={true}
-        eventHandlers={{
-          dragend: (e: L.LeafletEvent) => {
-            const marker = e.target as L.Marker;
-            const { lat, lng } = marker.getLatLng();
-            setPosition([lat, lng]);
-          },
-        }}
-      />
-    ) : null;
-  };
-
   //  LOCATION SEARCH
   const handleSearchQuery = async () => {
     setSearchLoading(true);
     try {
+      const { OpenStreetMapProvider } = await import("leaflet-geosearch");
       const provider = new OpenStreetMapProvider();
       const results = await provider.search({ query: searchQuery });
       if (results && results.length > 0) {
@@ -280,7 +253,9 @@ function Checkout() {
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
-            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            whileHover={{
+              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+            }}
             className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-100"
           >
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -297,7 +272,10 @@ function Checkout() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <User className="absolute left-3 top-3 text-blue-500" size={18} />
+                <User
+                  className="absolute left-3 top-3 text-blue-500"
+                  size={18}
+                />
                 <input
                   type="text"
                   value={address.fullName}
@@ -318,7 +296,10 @@ function Checkout() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Phone className="absolute left-3 top-3 text-blue-500" size={18} />
+                <Phone
+                  className="absolute left-3 top-3 text-blue-500"
+                  size={18}
+                />
                 <input
                   type="text"
                   value={address.mobile}
@@ -336,7 +317,10 @@ function Checkout() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Home className="absolute left-3 top-3 text-blue-500" size={18} />
+                <Home
+                  className="absolute left-3 top-3 text-blue-500"
+                  size={18}
+                />
                 <input
                   type="text"
                   value={address.fullAddress}
@@ -358,7 +342,10 @@ function Checkout() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Building className="absolute left-3 top-3 text-blue-500" size={18} />
+                  <Building
+                    className="absolute left-3 top-3 text-blue-500"
+                    size={18}
+                  />
                   <input
                     type="text"
                     value={address.city}
@@ -375,7 +362,10 @@ function Checkout() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Navigation className="absolute left-3 top-3 text-blue-500" size={18} />
+                  <Navigation
+                    className="absolute left-3 top-3 text-blue-500"
+                    size={18}
+                  />
                   <input
                     type="text"
                     value={address.state}
@@ -392,7 +382,10 @@ function Checkout() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Signpost className="absolute left-3 top-3 text-blue-500" size={18} />
+                  <Signpost
+                    className="absolute left-3 top-3 text-blue-500"
+                    size={18}
+                  />
                   <input
                     type="text"
                     value={address.pincode}
@@ -442,20 +435,9 @@ function Checkout() {
                 className="relative mt-6 h-[330px] rounded-xl overflow-hidden border-2 border-blue-100 shadow-lg"
               >
                 {position && (
-                  <MapContainer
-                    center={position as LatLngExpression}
-                    zoom={13}
-                    scrollWheelZoom={true}
-                    className="w-full h-full"
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <DraggableMarker />
-                  </MapContainer>
+                  <CheckOutMap position={position} setPosition={setPosition} />
                 )}
-                
+
                 {/* Current Location Button */}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -486,7 +468,9 @@ function Checkout() {
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
-            whileHover={{ boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)" }}
+            whileHover={{
+              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.2)",
+            }}
             className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-100 h-fit"
           >
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -503,18 +487,22 @@ function Checkout() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setPaymentMethod("online")}
                 className={`flex items-center gap-3 w-full border rounded-lg p-3 transition-all ${
-                  paymentMethod === "online" 
-                    ? "border-blue-600 bg-blue-50 shadow-md" 
+                  paymentMethod === "online"
+                    ? "border-blue-600 bg-blue-50 shadow-md"
                     : "border-gray-200 hover:bg-blue-50/50"
                 }`}
               >
                 <motion.div
-                  animate={paymentMethod === "online" ? { scale: [1, 1.2, 1] } : {}}
+                  animate={
+                    paymentMethod === "online" ? { scale: [1, 1.2, 1] } : {}
+                  }
                   transition={{ duration: 0.3 }}
                 >
                   <CreditCardIcon className="text-blue-600" />
                 </motion.div>
-                <span className="font-medium text-gray-700">Pay Online (Stripe)</span>
+                <span className="font-medium text-gray-700">
+                  Pay Online (Stripe)
+                </span>
                 {paymentMethod === "online" && (
                   <motion.div
                     initial={{ scale: 0 }}
@@ -531,18 +519,22 @@ function Checkout() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setPaymentMethod("cod")}
                 className={`flex items-center gap-3 w-full border rounded-lg p-3 transition-all ${
-                  paymentMethod === "cod" 
-                    ? "border-blue-600 bg-blue-50 shadow-md" 
+                  paymentMethod === "cod"
+                    ? "border-blue-600 bg-blue-50 shadow-md"
                     : "border-gray-200 hover:bg-blue-50/50"
                 }`}
               >
                 <motion.div
-                  animate={paymentMethod === "cod" ? { scale: [1, 1.2, 1] } : {}}
+                  animate={
+                    paymentMethod === "cod" ? { scale: [1, 1.2, 1] } : {}
+                  }
                   transition={{ duration: 0.3 }}
                 >
                   <Truck className="text-blue-600" />
                 </motion.div>
-                <span className="font-medium text-gray-700">Cash on Delivery</span>
+                <span className="font-medium text-gray-700">
+                  Cash on Delivery
+                </span>
                 {paymentMethod === "cod" && (
                   <motion.div
                     initial={{ scale: 0 }}
@@ -557,7 +549,7 @@ function Checkout() {
 
             {/* BILL SUMMARY */}
             <div className="border-t border-blue-100 pt-4 text-gray-700 space-y-2 text-sm sm:text-base">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
@@ -568,24 +560,26 @@ function Checkout() {
                   ৳ {subTotal}
                 </span>
               </motion.div>
-              
-              <motion.div 
+
+              <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
                 className="flex justify-between"
               >
                 <span className="font-semibold">Delivery Fee:</span>
-                <span className={`font-semibold px-3 py-1 rounded-full ${
-                  deliveryFee === 0 
-                    ? "bg-green-50 text-green-600" 
-                    : "bg-blue-50 text-blue-700"
-                }`}>
+                <span
+                  className={`font-semibold px-3 py-1 rounded-full ${
+                    deliveryFee === 0
+                      ? "bg-green-50 text-green-600"
+                      : "bg-blue-50 text-blue-700"
+                  }`}
+                >
                   ৳ {deliveryFee}
                 </span>
               </motion.div>
-              
-              <motion.div 
+
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
@@ -600,7 +594,10 @@ function Checkout() {
 
             {/* PLACE ORDER BUTTON */}
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.3)" }}
+              whileHover={{
+                scale: 1.02,
+                boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               disabled={placeOrderLoading}
               className="w-full mt-6 bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-full hover:from-blue-600 hover:to-blue-800 transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center gap-2"
@@ -619,7 +616,9 @@ function Checkout() {
                 </>
               ) : (
                 <>
-                  {paymentMethod === "cod" ? "Place Order" : "Pay & Place Order"}
+                  {paymentMethod === "cod"
+                    ? "Place Order"
+                    : "Pay & Place Order"}
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
